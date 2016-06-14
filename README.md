@@ -1,2 +1,2 @@
 # RobotCore
-Source code for STM Nucleo32 board. 
+Source code for STM Nucleof303k8 
