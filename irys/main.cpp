@@ -34,7 +34,7 @@ DigitalOut wifiEnable(D7);
 AnalogIn shfront(D6); 
 MPU6050 imu; 
 Ticker loop;
-PID controll(1,0.025,0.25,0.05);
+PID controll(2.0,1.25,0.25,0.1);
 
 int i; 
 float pitch;
@@ -45,9 +45,12 @@ double speed;
 void pid_thread() {
     
         imu.complementaryFilter(&pitch, &roll);
-        controll.setBias(pitch); 
+        controll.setProcessValue(pitch); 
         speed = controll.compute(); 
-        pc.printf("%f\r\n",speed);     
+        //pc.printf("%f\r\n",pitch); 
+        pc.printf("%f\r\n",speed); 
+        left.step(speed); 
+        right.step(-speed);    
 }
 
 int main() {
@@ -56,13 +59,14 @@ int main() {
     wifiEnable = 1; 
     imu.init();   
     imu.calibrate(&pitch,&roll);
-    controll.setMode(1); 
-    //loop.attach(pid_thread,0.01); 
+    controll.setMode(AUTO_MODE); 
+    loop.attach(pid_thread,0.05); 
+    controll.setSetPoint(0.0);
 
     while(1) { 
     
         
-        frontdistance = shfront.read(); 
+        /*frontdistance = shfront.read(); 
         left.enable(); 
         right.enable();
         if (frontdistance > 0.75f){
@@ -90,7 +94,7 @@ int main() {
             left.disable(); 
             right.disable();
         }
-        //pc.printf("%f\r\n",frontdistance);
+        //pc.printf("%f\r\n",frontdistance);*/
   }
 }
  

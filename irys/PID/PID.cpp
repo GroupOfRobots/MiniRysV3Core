@@ -8,8 +8,8 @@ PID::PID(float Kc, float tauI, float tauD, float interval) {
     //Default the limits to the full range of I/O: 3.3V
     //Make sure to set these to more appropriate limits for
     //your application.
-    setInputLimits(-2.0,2.0 );
-    setOutputLimits(0.0, 2400.0);
+    setInputLimits(-50.0,50.0 );
+    setOutputLimits(-2400.0, 2400.0);
 
     tSample_ = interval;
 
