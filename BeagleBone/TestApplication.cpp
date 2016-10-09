@@ -1,7 +1,28 @@
 //TestApplication
 
 /*Pin configuration
- *
+ P8 Header (changes in new version from 7 to 17)
+ 11 GPIO_45 - Motor Left M0 mode7
+ 13 GPIO_23 - Motor Left M1 mode7
+ 15 GPIO_47 - Motor Left M2 mode7
+ 17 GPIO_27 - Motor Right M0 mode7
+ 19 GPIO_22 - Motor Right M1 mode7
+ 21 GPIO_62 - Motor Right M2 mode7
+
+ P9 Header
+ 11 GPIO_30 - Motor Left Enable mode7
+ 12 GPIO_60 - Motor Right Direction mode7
+ 13 GPIO_31 - Motor Left Step mode7
+ 14 GPIO_50 - Motor Right Step mode7
+ 15 GPIO_48 - Motor Left Direction mode7
+ 16 GPIO_51 - Motor Right Enable mode7// end pins for Stepper
+
+ 17 GPIO_5 - I2C SCL mode2
+ 18 GPIO_4 - I2C SDA mode2
+ 36 AIN5 - cell 1 (1.8V tolerant!!!)
+ 38 AIN3 - cell2
+ 40 AIN! - cell3
+ //rest to configure
 
 */
 
