@@ -1,5 +1,4 @@
-#include "drop_bone_imu.h"
-#include "udp.h"
+#include "MPU6050.h"
 
 #include <stdio.h>
 #include <stdlib.h>
