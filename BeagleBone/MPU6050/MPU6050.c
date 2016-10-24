@@ -23,7 +23,7 @@ int print_usage_flag;
 int silent_flag;
 int no_broadcast_flag; //useful for testing when offline
 
-int main(int argc, char** argv){
+/*int main(int argc, char** argv){
     parse_args(argc, argv);
     if(print_usage_flag) {
         print_usage();
@@ -75,13 +75,9 @@ int main(int argc, char** argv){
             if(!silent_flag && verbose_flag) {
                 printf("Yaw: %+5.1f\tPitch: %+5.1f\tRoll: %+5.1f\n", angles[0]*180.0/PI, angles[1]*180.0/PI, angles[2]*180.0/PI);
             }
-            // send the values in angles over UDP as a string (in udp.c/h)
-            if(!no_broadcast_flag) {
-                udp_send(angles, 13);
-            }
         }
     }
-}
+}*/
 
 void parse_args(int argc, char** argv) {
     int ch, opt_count;

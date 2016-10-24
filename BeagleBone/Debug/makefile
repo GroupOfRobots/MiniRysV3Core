@@ -10,6 +10,7 @@ RM := rm -rf
 -include sources.mk
 -include StepperDriver/subdir.mk
 -include SimpleGPIO/subdir.mk
+-include MPU6050/subdir.mk
 -include subdir.mk
 -include objects.mk
 

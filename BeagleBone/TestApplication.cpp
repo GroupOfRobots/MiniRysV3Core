@@ -7,7 +7,7 @@
  15 GPIO_47 - Motor Left M2 mode7
  17 GPIO_27 - Motor Right M0 mode7
  19 GPIO_22 - Motor Right M1 mode7
- 21 GPIO_62 - Motor Right M2 mode7
+ 21 GPIO_62 - Motor Right M2 mode7 //emmc2pin could be problematic
 
  P9 Header
  11 GPIO_30 - Motor Left Enable mode7
@@ -31,22 +31,18 @@
 #include <unistd.h>
 #include "SimpleGPIO/SimpleGPIO.h"
 #include "StepperDriver/EasyDriver.h"
-#include "MPU6050/MPU6050.h"
+//#include "MPU6050/MPU6050.h"
 using namespace std;
 
 
 void stepperMotorTest(){
 
-	//Set up the mux mode correctly on the P8 Header for the following pins:
-	//Set up as output pins 0x07 (Mode 7 on all pins)
-	//gpio_omap_mux_setup("gpmc_ad7", "07"); 	//gpio 39 P8pin# 4
-	//gpio_omap_mux_setup("gpmc_ad10", "07"); //gpio 26 P8pin#14
-	//gpio_omap_mux_setup("gpmc_ad6", "07"); 	//gpio 38 P8pin# 3
-	//gpio_omap_mux_setup("gpmc_ad2", "07"); 	//gpio 34 P8pin# 5
-	//gpio_omap_mux_setup("gpmc_ad12", "07"); //gpio 44 p8pin#12
+	//in new kernel only device tree manager is available instead of omap_mux
+	//just create dto file slot for irys cape :)
+
 
 	//gpio_MS1, gpio_MS2, gpio_STEP, gpio_SLP, gpio_DIR, rpm speed, steps per revolution
-	EasyDriver motor1(38, 39, 34, 26, 44, 60, 200); //gpio pins (last two arguments not necessary as they are the default values)
+	EasyDriver motor1(45, 23, 31, 30, 48, 120, 200); //gpio pins (last two arguments not necessary as they are the default values)
 
 	//In case the motor SLP (sleep) pin is low
 	motor1.wake();
