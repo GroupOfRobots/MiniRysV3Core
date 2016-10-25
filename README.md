@@ -1,2 +1,2 @@
 # RobotCore
-Source code for beaglebone green
+Source code for beaglebone green wireless include device tree overlay
