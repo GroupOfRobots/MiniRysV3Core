@@ -17,11 +17,11 @@
  15 GPIO_48 - Motor Left Direction mode7
  16 GPIO_51 - Motor Right Enable mode7// end pins for Stepper
 
- 17 GPIO_5 - I2C SCL mode2
- 18 GPIO_4 - I2C SDA mode2
+ 19 GPIO_5 - I2C SCL mode2
+ 20 GPIO_4 - I2C SDA mode2
  36 AIN5 - cell 1 (1.8V tolerant!!!)
  38 AIN3 - cell2
- 40 AIN! - cell3
+ 40 AIN1 - cell3
  SPI1 not available !
  //rest to configure
 
