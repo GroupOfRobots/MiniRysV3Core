@@ -22,6 +22,7 @@
  36 AIN5 - cell 1 (1.8V tolerant!!!)
  38 AIN3 - cell2
  40 AIN! - cell3
+ SPI1 not available !
  //rest to configure
 
 */
