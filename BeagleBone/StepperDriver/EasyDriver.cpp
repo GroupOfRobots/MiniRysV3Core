@@ -39,7 +39,7 @@ EasyDriver::EasyDriver(int gpio_MS1, int gpio_MS2, int gpio_STEP, int gpio_SLP,
 	this->gpio_SLP  = gpio_SLP;
 	this->gpio_DIR  = gpio_DIR;
 
-	gpio_export(this->gpio_MS1);
+	/*gpio_export(this->gpio_MS1);
 	gpio_set_dir(this->gpio_MS1, OUTPUT_PIN);
 	gpio_export(this->gpio_MS2);
 	gpio_set_dir(this->gpio_MS2, OUTPUT_PIN);
@@ -49,6 +49,7 @@ EasyDriver::EasyDriver(int gpio_MS1, int gpio_MS2, int gpio_STEP, int gpio_SLP,
 	gpio_set_dir(this->gpio_SLP, OUTPUT_PIN);
 	gpio_export(this->gpio_DIR);
 	gpio_set_dir(this->gpio_DIR, OUTPUT_PIN);
+	*/
 
 	// default to clockwise direction
 	clockwise = true;
@@ -95,13 +96,13 @@ void EasyDriver::setSpeed(float rpm) {
 }
 
 void EasyDriver::step(int numberOfSteps){
-	cout << "Doing "<< numberOfSteps << " steps and going to sleep for " << uSecDelay/delayFactor << "uS\n";
 	int sleepDelay = uSecDelay/delayFactor;
 	if(numberOfSteps>=0) {
 		if(clockwise) gpio_set_value(this->gpio_DIR, LOW);
 		else gpio_set_value(this->gpio_DIR, HIGH);
 		for(int i=0; i<numberOfSteps; i++){
 			gpio_set_value(this->gpio_STEP, LOW);
+			usleep(sleepDelay);
 			gpio_set_value(this->gpio_STEP, HIGH);
 			usleep(sleepDelay);
 		}
@@ -111,6 +112,7 @@ void EasyDriver::step(int numberOfSteps){
 		else gpio_set_value(this->gpio_DIR, LOW);
 		for(int i=numberOfSteps; i<=0; i++){
 			gpio_set_value(this->gpio_STEP, LOW);
+			usleep(sleepDelay);
 			gpio_set_value(this->gpio_STEP, HIGH);
 			usleep(sleepDelay);
 		}
@@ -120,16 +122,15 @@ void EasyDriver::step(int numberOfSteps){
 void EasyDriver::rotate(int degrees){
 	float degreesPerStep = 360.0f/getStepsPerRevolution();
 	int numberOfSteps = degrees/degreesPerStep;
-	cout << "The number of steps is " << numberOfSteps << endl;
-	cout << "The delay factor is " << delayFactor << endl;
 	step(numberOfSteps*delayFactor);
 }
 
 EasyDriver::~EasyDriver() {
-	gpio_unexport(this->gpio_MS1);
+	/*gpio_unexport(this->gpio_MS1);
 	gpio_unexport(this->gpio_MS2);
 	gpio_unexport(this->gpio_STEP);
 	gpio_unexport(this->gpio_SLP);
 	gpio_unexport(this->gpio_DIR);
+	*/
 }
 

@@ -69,8 +69,8 @@ class EasyDriver {
 		void setStepsPerRevolution(int steps) { stepsPerRevolution = steps; }
 		int  getStepsPerRevolution() { return stepsPerRevolution; }
 
-		void sleep()    { asleep = true;  gpio_set_value(this->gpio_SLP, LOW);  }
-		void wake()     { asleep = false; gpio_set_value(this->gpio_SLP, HIGH); }
+		void sleep()    { asleep = true;  gpio_set_value(this->gpio_SLP, HIGH);  }
+		void wake()     { asleep = false; gpio_set_value(this->gpio_SLP, LOW); }
 		bool isAsleep() { return asleep; }
 
 		virtual ~EasyDriver();  // unexport the gpios

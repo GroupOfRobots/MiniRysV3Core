@@ -212,22 +212,3 @@ int gpio_fd_close(int fd)
 {
 	return close(fd);
 }
-
-
-/****************************************************************
- * gpio_omap_mux_setup - Allow us to setup the omap mux mode for a pin
- ****************************************************************/
-int gpio_omap_mux_setup(const char *omap_pin0_name, const char *mode)
-{
-	int fd;
-	char buf[MAX_BUF];
-	snprintf(buf, sizeof(buf), SYSFS_OMAP_MUX_DIR "%s", omap_pin0_name);
-	fd = open(buf, O_WRONLY);
-	if (fd < 0) {
-		perror("failed to open OMAP_MUX");
-		return fd;
-	}
-	write(fd, mode, strlen(mode) + 1);
-	close(fd);
-	return 0;
-}
