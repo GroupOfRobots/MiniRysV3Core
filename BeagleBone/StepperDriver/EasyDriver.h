@@ -28,14 +28,7 @@
 #ifndef EASYDRIVER_H_
 #define EASYDRIVER_H_
 
-#include "../SimpleGPIO/SimpleGPIO.h"
 
-enum STEP_MODE {
-	STEP_FULL,
-	STEP_HALF,
-	STEP_QUARTER,
-	STEP_EIGHT
-};
 
 class EasyDriver {
 
@@ -45,32 +38,21 @@ class EasyDriver {
 		int 			gpio_MS1, gpio_MS2, gpio_STEP, gpio_SLP, gpio_DIR;
 		unsigned int 	uSecDelay;
 		bool 			clockwise;
-		int 			delayFactor;  // keep constant rpm even with microstepping
 
 	protected:
-		STEP_MODE 	stepMode;
 		float 		speed;
-		int   		stepsPerRevolution;
 		bool  		asleep;
 
 	public:
-		EasyDriver(int gpio_MS1, int gpio_MS2, int gpio_STEP, int gpio_SLP, int gpio_DIR,
-				   int speedRPM = 60, int stepsPerRevolution = 200);
+		EasyDriver(int gpio_MS1, int gpio_MS2, int gpio_STEP, int gpio_SLP, int gpio_DIR);
 
-		void step(int numberOfSteps = 1); // defaults to 1 if no value is passed
-		void rotate(int degrees);
 		void reverseDirection() { clockwise = !clockwise; }
-		void setStepMode(STEP_MODE mode);
-		STEP_MODE getStepMode() { return stepMode; }
 
 		void  setSpeed(float rpm);
 		float getSpeed() { return speed; }
 
-		void setStepsPerRevolution(int steps) { stepsPerRevolution = steps; }
-		int  getStepsPerRevolution() { return stepsPerRevolution; }
-
-		void sleep()    { asleep = true;  gpio_set_value(this->gpio_SLP, HIGH);  }
-		void wake()     { asleep = false; gpio_set_value(this->gpio_SLP, LOW); }
+		//void sleep()    { asleep = true;  gpio_set_value(this->gpio_SLP, HIGH);  }
+		//void wake()     { asleep = false; gpio_set_value(this->gpio_SLP, LOW); }
 		bool isAsleep() { return asleep; }
 
 		virtual ~EasyDriver();  // unexport the gpios

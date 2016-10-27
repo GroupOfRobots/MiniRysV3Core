@@ -9,8 +9,8 @@ RM := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include StepperDriver/subdir.mk
--include SimpleGPIO/subdir.mk
 -include MPU6050/subdir.mk
+-include Gpio/subdir.mk
 -include subdir.mk
 -include objects.mk
 

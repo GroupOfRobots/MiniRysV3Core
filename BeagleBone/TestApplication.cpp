@@ -1,4 +1,5 @@
-//TestApplication
+//TestApplication //something is wrong with libs try to use blacklib
+
 
 /*Pin configuration
  P8 Header (changes in new version from 7 to 17)
@@ -30,64 +31,11 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
-#include "SimpleGPIO/SimpleGPIO.h"
-#include "StepperDriver/EasyDriver.h"
+#include "Gpio/memGPIO.hpp"
 //#include "MPU6050/MPU6050.h"
 using namespace std;
 
 
-void stepperMotorTest(){
-
-
-	//gpio_MS1, gpio_MS2, gpio_STEP, gpio_SLP, gpio_DIR, rpm speed, steps per revolution
-	EasyDriver motor1(45, 23, 31, 30, 48, 120, 200);
-	//EasyDriver motor2(27, 22, 50, 51, 60, 10, 200);
-
-	//In case the motor SLP (sleep) pin is low
-	motor1.wake();
-	//motor2.wake();
-
-	cout << "*** Start of Motor Test" << endl;
-	//cout << "*** Rotating - Forward 360 degrees (full step)" << endl;
-	//forward single step
-	motor1.step(720);
-	//motor2.step(720);
-	sleep(1);	//sleep for 1 second between each test stage
-
-	//back half step
-	//cout << "*** Rotating - Reverse 360 degrees (half step)" << endl;
-	//motor1.setStepMode(STEP_HALF);
-	//motor1.reverseDirection();
-	//motor1.rotate(720);
-	//sleep(1);
-
-	//cout << "*** Set speed to 120rpm" << endl;
-	//motor1.setSpeed(10);
-
-	//forward quarter step
-	//cout << "*** Rotating - Forward 360 degrees (quarter step)" << endl;
-	//motor1.setStepMode(STEP_QUARTER);
-	//motor1.reverseDirection();
-	//motor1.rotate(360);
-	//sleep(1);
-
-	//reverse eight step
-	//cout << "*** Rotating - Reverse 360 degrees (eight step)" << endl;
-	//motor1.setStepMode(STEP_EIGHT);
-	//motor1.rotate(-360);
-
-	//cout << "*** Sleep the motor for 5 seconds" << endl;
-	//Sleep the EasyDriver controller
-	motor1.sleep();  //easy to move motor shaft while sleep is enabled
-	//motor2.sleep();
-
-	sleep(5);
-	//motor1.wake(); not necessary in this case as destructor of motor1 calls unexport
-
-	cout << "*** Motor Test Finished" << endl;
-
-	//motor1 object destroyed now (goes out of scope)
-}
 
 void imuInitialize(){
 
@@ -99,73 +47,77 @@ void imuInitialize(){
 
 int main(int argc, char *argv[]){
 
-	gpio_export(45);
-	gpio_set_dir(45, OUTPUT_PIN); //left mo
-	gpio_export(23);
-	gpio_set_dir(23, OUTPUT_PIN); //left m1
-	gpio_export(31);
-	gpio_set_dir(31, OUTPUT_PIN); //step
-	gpio_export(48);
-	gpio_set_dir(48, OUTPUT_PIN); //dir
-	gpio_export(30);
-	gpio_set_dir(30, OUTPUT_PIN); //enable
+	easyBlack::memGPIO Irys;
+	// Get PINs data for better performance.
+	easyBlack::memGPIO::gpioPin usr0 = Irys.getPin ("USR0");
+	easyBlack::memGPIO::gpioPin left_m0 = Irys.getPin ("P8_11");
+	easyBlack::memGPIO::gpioPin left_m1 = Irys.getPin ("P8_13");
+	easyBlack::memGPIO::gpioPin left_m2 = Irys.getPin ("P8_15");
+	easyBlack::memGPIO::gpioPin right_m0 = Irys.getPin ("P8_17");
+	easyBlack::memGPIO::gpioPin right_m1 = Irys.getPin ("P8_19");
+	easyBlack::memGPIO::gpioPin right_m2 = Irys.getPin ("P8_21");
+
+	easyBlack::memGPIO::gpioPin left_en = Irys.getPin ("P9_11");
+	easyBlack::memGPIO::gpioPin right_dir = Irys.getPin ("P9_12");
+	easyBlack::memGPIO::gpioPin left_stp = Irys.getPin ("P9_13");
+	easyBlack::memGPIO::gpioPin right_stp = Irys.getPin ("P9_14");
+	easyBlack::memGPIO::gpioPin left_dir = Irys.getPin ("P9_15");
+	easyBlack::memGPIO::gpioPin right_en = Irys.getPin ("P9_16");
+
+	const unsigned char output = Irys.OUTPUT;
+	const unsigned char low = Irys.LOW;
+	const unsigned char high = Irys.HIGH;
+
+	Irys.pinMode (usr0, output);
+	Irys.pinMode (left_m0, output);
+	Irys.pinMode (left_m1, output);
+	Irys.pinMode (left_m2, output);
+	Irys.pinMode (right_m0, output);
+	Irys.pinMode (right_m1, output);
+	Irys.pinMode (right_m2, output);
+	Irys.pinMode (left_en, output);
+	Irys.pinMode (left_dir, output);
+	Irys.pinMode (left_stp, output);
+	Irys.pinMode (right_en, output);
+	Irys.pinMode (right_dir, output);
+	Irys.pinMode (right_stp, output);
 
 
-	gpio_export(27);
-	gpio_set_dir(27, OUTPUT_PIN); //right m0
-	gpio_export(22);
-	gpio_set_dir(22, OUTPUT_PIN); //right m1
-	gpio_export(50);
-	gpio_set_dir(50, OUTPUT_PIN); //right step
-	gpio_export(60);
-	gpio_set_dir(60, OUTPUT_PIN); // right dir
-	gpio_export(51);
-	gpio_set_dir(51, OUTPUT_PIN); //right enable
+	Irys.digitalWrite (left_en, low);
+	Irys.digitalWrite (right_en, low);
+	Irys.digitalWrite (left_dir, low);
+	Irys.digitalWrite (right_dir, low);
 
-	gpio_set_value(30, LOW);
-	gpio_set_value(48, LOW);
-	gpio_set_value(51, LOW);
-	gpio_set_value(60, LOW);
-
-	gpio_set_value(45, LOW);
-	gpio_set_value(23, HIGH);
-	gpio_set_value(27, LOW);
-	gpio_set_value(22, HIGH);
+	Irys.digitalWrite (left_m0, low);
+	Irys.digitalWrite (left_m1, low);
+	Irys.digitalWrite (left_m2, low);
+	Irys.digitalWrite (right_m0, low);
+	Irys.digitalWrite (right_m1, low);
+	Irys.digitalWrite (right_m2, low);
 
 
-	for(int i=0; i<1000; i++){
+	for(int i=0; i<10000; i++){
 
 
-		gpio_set_value(50, LOW);
-		gpio_set_value(31, LOW);
-		usleep(100);
-		gpio_set_value(31, HIGH);
-		gpio_set_value(50, HIGH);
-		usleep(100);
+		Irys.digitalWrite(right_stp,low);
+		Irys.digitalWrite(left_stp,low);
+		Irys.digitalWrite(usr0,low);
+		usleep(51);
+		Irys.digitalWrite(right_stp,high);
+		Irys.digitalWrite(left_stp,high);
+		Irys.digitalWrite(usr0,high);
+		usleep(51);
 	}
 
     usleep(100);
-	gpio_set_value(51, HIGH);
-	gpio_set_value(50, HIGH);
-	gpio_set_value(60, HIGH);
-	gpio_set_value(30, HIGH);
-	gpio_set_value(27, HIGH);
-	gpio_set_value(22, HIGH);
-	usleep(100);
-
-	gpio_unexport(45);
-	gpio_unexport(23);
-	gpio_unexport(31);
-	gpio_unexport(48);
-	gpio_unexport(30);
+	Irys.digitalWrite (left_en, high);
+	Irys.digitalWrite (right_en, high);
 
 
-	gpio_unexport(27);
-	gpio_unexport(22);
-	gpio_unexport(50);
-	gpio_unexport(60);
-	gpio_unexport(51);
+	Irys.resetLEDPin0ToDefault ();
+	Irys.~memGPIO ();
 
+	  exit (EXIT_SUCCESS);
 
 
 

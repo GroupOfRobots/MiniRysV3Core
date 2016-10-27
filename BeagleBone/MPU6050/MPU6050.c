@@ -95,9 +95,9 @@ void parse_args(int argc, char** argv) {
             case 'b': no_broadcast_flag=1; break;
             case 'o':
                 // Parse the orientation matrix
-                opt_count = sscanf(optarg, "%hhi,%hhi,%hhi,%hhi,%hhi,%hhi,%hhi,%hhi,%hhi", gyro_orientation, gyro_orientation+1,
-                          gyro_orientation+2, gyro_orientation+3, gyro_orientation+4, gyro_orientation+5,
-                          gyro_orientation+6, gyro_orientation+7, gyro_orientation+8);
+                //deleteopt_count = sscanf(optarg, "%hhi,%hhi,%hhi,%hhi,%hhi,%hhi,%hhi,%hhi,%hhi", gyro_orientation, gyro_orientation+1,
+                 //         gyro_orientation+2, gyro_orientation+3, gyro_orientation+4, gyro_orientation+5,
+                 //         gyro_orientation+6, gyro_orientation+7, gyro_orientation+8);
                 if (opt_count != 9) {
                     printf("Must supply 9 comma separated values to the orientation option.\n");
                     exit(-1); // Exit because we don't know what the behaviour will be!
