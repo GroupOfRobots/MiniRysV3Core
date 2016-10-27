@@ -328,23 +328,4 @@ namespace BlackLib
         return ( this->threadState == BlackThread::Stopped );
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 } /* namespace BlackLib */

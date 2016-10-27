@@ -23,8 +23,18 @@ CPP_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
-Gpio \
 MPU6050 \
 StepperDriver \
 . \
+blacklib/BlackADC \
+blacklib \
+blacklib/BlackDirectory \
+blacklib/BlackGPIO \
+blacklib/BlackI2C \
+blacklib/BlackMutex \
+blacklib/BlackPWM \
+blacklib/BlackSPI \
+blacklib/BlackThread \
+blacklib/BlackTime \
+blacklib/BlackUART \
 

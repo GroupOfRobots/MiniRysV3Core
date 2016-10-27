@@ -1,6 +1,6 @@
-CXX=arm-linux-gnueabi-g++
+CXX=arm-linux-gnueabihf-g++
 
-INCLUDES=-I/usr/arm-linux-gnueabi/include/c++/4.6.3
+INCLUDES=-I/usr/arm-linux-gnueabihf/include/c++/4.6.3
 
 CPPFLAGS=-D__GXX_EXPERIMENTAL_CXX0X__ -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1 -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2 -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4 -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8
 
@@ -8,11 +8,11 @@ CXXFLAGS=-std=c++0x -O0 -g3 -Wall -c -fmessage-length=0 -pthread $(CPPFLAGS) $(I
 
 LDFLAGS=-lpthread
 
-LDLIBS=-L/usr/arm-linux-gnueabi/lib
+LDLIBS=-L/usr/arm-linux-gnueabihf/lib
 
 RM=rm -f
 
-SOURCES=./BlackADC/BlackADC.cpp ./BlackDirectory/BlackDirectory.cpp  ./BlackGPIO/BlackGPIO.cpp ./BlackI2C/BlackI2C.cpp ./BlackMutex/BlackMutex.cpp ./BlackPWM/BlackPWM.cpp ./BlackSPI/BlackSPI.cpp ./BlackThread/BlackThread.cpp ./BlackTime/BlackTime.cpp  ./BlackUART/BlackUART.cpp ./BlackCore.cpp ./examples.cpp
+SOURCES=./BlackADC/BlackADC.cpp ./BlackDirectory/BlackDirectory.cpp  ./BlackGPIO/BlackGPIO.cpp ./BlackI2C/BlackI2C.cpp ./BlackMutex/BlackMutex.cpp ./BlackPWM/BlackPWM.cpp ./BlackSPI/BlackSPI.cpp ./BlackThread/BlackThread.cpp ./BlackTime/BlackTime.cpp  ./BlackUART/BlackUART.cpp ./BlackCore.cpp 
 
 OBJECTS=$(SOURCES:.cpp=.o)
 

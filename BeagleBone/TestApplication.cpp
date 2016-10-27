@@ -31,7 +31,8 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
-#include "Gpio/memGPIO.hpp"
+#include "blacklib/BlackLib.h"
+#include "blacklib/BlackGPIO/BlackGPIO.h"
 //#include "MPU6050/MPU6050.h"
 using namespace std;
 
@@ -43,82 +44,53 @@ void imuInitialize(){
 }
 
 
-
-
 int main(int argc, char *argv[]){
 
-	easyBlack::memGPIO Irys;
-	// Get PINs data for better performance.
-	easyBlack::memGPIO::gpioPin usr0 = Irys.getPin ("USR0");
-	easyBlack::memGPIO::gpioPin left_m0 = Irys.getPin ("P8_11");
-	easyBlack::memGPIO::gpioPin left_m1 = Irys.getPin ("P8_13");
-	easyBlack::memGPIO::gpioPin left_m2 = Irys.getPin ("P8_15");
-	easyBlack::memGPIO::gpioPin right_m0 = Irys.getPin ("P8_17");
-	easyBlack::memGPIO::gpioPin right_m1 = Irys.getPin ("P8_19");
-	easyBlack::memGPIO::gpioPin right_m2 = Irys.getPin ("P8_21");
 
-	easyBlack::memGPIO::gpioPin left_en = Irys.getPin ("P9_11");
-	easyBlack::memGPIO::gpioPin right_dir = Irys.getPin ("P9_12");
-	easyBlack::memGPIO::gpioPin left_stp = Irys.getPin ("P9_13");
-	easyBlack::memGPIO::gpioPin right_stp = Irys.getPin ("P9_14");
-	easyBlack::memGPIO::gpioPin left_dir = Irys.getPin ("P9_15");
-	easyBlack::memGPIO::gpioPin right_en = Irys.getPin ("P9_16");
+	BlackLib::BlackGPIO left_m0(BlackLib::GPIO_45,BlackLib::output, BlackLib::FastMode);
+	BlackLib::BlackGPIO left_m1(BlackLib::GPIO_23,BlackLib::output, BlackLib::FastMode);
+	BlackLib::BlackGPIO left_m2(BlackLib::GPIO_47,BlackLib::output, BlackLib::FastMode);
 
-	const unsigned char output = Irys.OUTPUT;
-	const unsigned char low = Irys.LOW;
-	const unsigned char high = Irys.HIGH;
+	BlackLib::BlackGPIO right_m0(BlackLib::GPIO_27,BlackLib::output, BlackLib::FastMode);
+	BlackLib::BlackGPIO right_m1(BlackLib::GPIO_22,BlackLib::output, BlackLib::FastMode);
+	BlackLib::BlackGPIO right_m2(BlackLib::GPIO_62,BlackLib::output, BlackLib::FastMode);
 
-	Irys.pinMode (usr0, output);
-	Irys.pinMode (left_m0, output);
-	Irys.pinMode (left_m1, output);
-	Irys.pinMode (left_m2, output);
-	Irys.pinMode (right_m0, output);
-	Irys.pinMode (right_m1, output);
-	Irys.pinMode (right_m2, output);
-	Irys.pinMode (left_en, output);
-	Irys.pinMode (left_dir, output);
-	Irys.pinMode (left_stp, output);
-	Irys.pinMode (right_en, output);
-	Irys.pinMode (right_dir, output);
-	Irys.pinMode (right_stp, output);
+	BlackLib::BlackGPIO left_en(BlackLib::GPIO_30,BlackLib::output, BlackLib::FastMode);
+	BlackLib::BlackGPIO left_dir(BlackLib::GPIO_48,BlackLib::output, BlackLib::FastMode);
+	BlackLib::BlackGPIO left_step(BlackLib::GPIO_31,BlackLib::output, BlackLib::FastMode);
 
+	BlackLib::BlackGPIO right_en(BlackLib::GPIO_51,BlackLib::output, BlackLib::FastMode);
+	BlackLib::BlackGPIO right_dir(BlackLib::GPIO_60,BlackLib::output, BlackLib::FastMode);
+	BlackLib::BlackGPIO right_step(BlackLib::GPIO_50,BlackLib::output, BlackLib::FastMode);
 
-	Irys.digitalWrite (left_en, low);
-	Irys.digitalWrite (right_en, low);
-	Irys.digitalWrite (left_dir, low);
-	Irys.digitalWrite (right_dir, low);
+	left_en.setValue(BlackLib::low);
+	right_en.setValue(BlackLib::low);
+	left_dir.setValue(BlackLib::low);
+	right_dir.setValue(BlackLib::low);
 
-	Irys.digitalWrite (left_m0, low);
-	Irys.digitalWrite (left_m1, low);
-	Irys.digitalWrite (left_m2, low);
-	Irys.digitalWrite (right_m0, low);
-	Irys.digitalWrite (right_m1, low);
-	Irys.digitalWrite (right_m2, low);
+	right_m0.setValue(BlackLib::low);
+	right_m1.setValue(BlackLib::low);
+	right_m2.setValue(BlackLib::low);
+
+	left_m0.setValue(BlackLib::low);
+	left_m1.setValue(BlackLib::low);
+	left_m2.setValue(BlackLib::low);
 
 
 	for(int i=0; i<10000; i++){
 
 
-		Irys.digitalWrite(right_stp,low);
-		Irys.digitalWrite(left_stp,low);
-		Irys.digitalWrite(usr0,low);
+		left_step.setValue(BlackLib::low);
+		right_step.setValue(BlackLib::low);
 		usleep(51);
-		Irys.digitalWrite(right_stp,high);
-		Irys.digitalWrite(left_stp,high);
-		Irys.digitalWrite(usr0,high);
+		left_step.setValue(BlackLib::high);
+		right_step.setValue(BlackLib::high);
 		usleep(51);
 	}
 
     usleep(100);
-	Irys.digitalWrite (left_en, high);
-	Irys.digitalWrite (right_en, high);
-
-
-	Irys.resetLEDPin0ToDefault ();
-	Irys.~memGPIO ();
-
-	  exit (EXIT_SUCCESS);
-
+	left_en.setValue(BlackLib::high);
+	right_en.setValue(BlackLib::high);
 
 
 	return 0;
