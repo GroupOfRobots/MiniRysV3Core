@@ -28,13 +28,9 @@ StepperDriver \
 . \
 blacklib/BlackADC \
 blacklib \
-blacklib/BlackDirectory \
 blacklib/BlackGPIO \
 blacklib/BlackI2C \
-blacklib/BlackMutex \
 blacklib/BlackPWM \
 blacklib/BlackSPI \
-blacklib/BlackThread \
 blacklib/BlackTime \
-blacklib/BlackUART \
 

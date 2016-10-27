@@ -35,12 +35,8 @@
 #include "BlackADC/BlackADC.h"
 #include "BlackPWM/BlackPWM.h"
 #include "BlackGPIO/BlackGPIO.h"
-#include "BlackUART/BlackUART.h"
 #include "BlackSPI/BlackSPI.h"
 #include "BlackI2C/BlackI2C.h"
-#include "BlackThread/BlackThread.h"
-#include "BlackMutex/BlackMutex.h"
-#include "BlackDirectory/BlackDirectory.h"
 #include "BlackTime/BlackTime.h"
 
 
