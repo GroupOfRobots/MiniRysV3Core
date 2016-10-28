@@ -47,20 +47,22 @@ void imuInitialize(){
 int main(int argc, char *argv[]){
 
 
-	BlackLib::BlackGPIO left_m0(BlackLib::GPIO_45,BlackLib::output, BlackLib::FastMode);
-	BlackLib::BlackGPIO left_m1(BlackLib::GPIO_23,BlackLib::output, BlackLib::FastMode);
-	BlackLib::BlackGPIO left_m2(BlackLib::GPIO_47,BlackLib::output, BlackLib::FastMode);
 
-	BlackLib::BlackGPIO right_m0(BlackLib::GPIO_27,BlackLib::output, BlackLib::FastMode);
-	BlackLib::BlackGPIO right_m1(BlackLib::GPIO_22,BlackLib::output, BlackLib::FastMode);
-	BlackLib::BlackGPIO right_m2(BlackLib::GPIO_62,BlackLib::output, BlackLib::FastMode);
 
-	BlackLib::BlackGPIO left_en(BlackLib::GPIO_30,BlackLib::output, BlackLib::FastMode);
-	BlackLib::BlackGPIO left_dir(BlackLib::GPIO_48,BlackLib::output, BlackLib::FastMode);
+	BlackLib::BlackGPIO left_m0(BlackLib::GPIO_45,BlackLib::output, BlackLib::SecureMode);
+	BlackLib::BlackGPIO left_m1(BlackLib::GPIO_23,BlackLib::output, BlackLib::SecureMode);
+	BlackLib::BlackGPIO left_m2(BlackLib::GPIO_47,BlackLib::output, BlackLib::SecureMode);
+
+	BlackLib::BlackGPIO right_m0(BlackLib::GPIO_27,BlackLib::output, BlackLib::SecureMode);
+	BlackLib::BlackGPIO right_m1(BlackLib::GPIO_22,BlackLib::output, BlackLib::SecureMode);
+	BlackLib::BlackGPIO right_m2(BlackLib::GPIO_62,BlackLib::output, BlackLib::SecureMode);
+
+	BlackLib::BlackGPIO left_en(BlackLib::GPIO_30,BlackLib::output, BlackLib::SecureMode);
+	BlackLib::BlackGPIO left_dir(BlackLib::GPIO_48,BlackLib::output, BlackLib::SecureMode);
 	BlackLib::BlackGPIO left_step(BlackLib::GPIO_31,BlackLib::output, BlackLib::FastMode);
 
-	BlackLib::BlackGPIO right_en(BlackLib::GPIO_51,BlackLib::output, BlackLib::FastMode);
-	BlackLib::BlackGPIO right_dir(BlackLib::GPIO_60,BlackLib::output, BlackLib::FastMode);
+	BlackLib::BlackGPIO right_en(BlackLib::GPIO_51,BlackLib::output, BlackLib::SecureMode);
+	BlackLib::BlackGPIO right_dir(BlackLib::GPIO_60,BlackLib::output, BlackLib::SecureMode);
 	BlackLib::BlackGPIO right_step(BlackLib::GPIO_50,BlackLib::output, BlackLib::FastMode);
 
 	left_en.setValue(BlackLib::low);
@@ -69,7 +71,7 @@ int main(int argc, char *argv[]){
 	right_dir.setValue(BlackLib::low);
 
 	right_m0.setValue(BlackLib::low);
-	right_m1.setValue(BlackLib::low);
+	right_m1.setValue(BlackLib::high);
 	right_m2.setValue(BlackLib::low);
 
 	left_m0.setValue(BlackLib::low);
@@ -77,20 +79,42 @@ int main(int argc, char *argv[]){
 	left_m2.setValue(BlackLib::low);
 
 
-	for(int i=0; i<10000; i++){
+	for(int i=0; i<100000; i++){
 
 
 		left_step.setValue(BlackLib::low);
 		right_step.setValue(BlackLib::low);
-		usleep(51);
+		usleep(1);
 		left_step.setValue(BlackLib::high);
 		right_step.setValue(BlackLib::high);
-		usleep(51);
+		usleep(1);
 	}
+
+       if( right_en.setValue(BlackLib::high) )
+       {
+           std::cout << "Gpio 51 set low successfully (This is not possible)." << std::endl;
+       }
+       else
+       {
+           std::cout << std::endl << "Gpio 50 couldn't set. Because this pin's direction is input."
+                     << std::endl << "You can't write anything to input type pin." << std::endl;
+       }
 
     usleep(100);
 	left_en.setValue(BlackLib::high);
 	right_en.setValue(BlackLib::high);
+
+	std::fstream fs;
+
+		   fs.open("/sys/class/gpio/export");
+		   fs << "51";
+		   fs.close();
+		   fs.open("/sys/class/gpio/gpio51/direction");
+		   fs << "out";
+		   fs.close();
+		   fs.open("/sys/class/gpio/gpio51/value");
+		   fs << "1";
+		   fs.close();
 
 
 	return 0;

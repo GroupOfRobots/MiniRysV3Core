@@ -23,135 +23,34 @@ int print_usage_flag;
 int silent_flag;
 int no_broadcast_flag; //useful for testing when offline
 
-/*int main(int argc, char** argv){
-    parse_args(argc, argv);
-    if(print_usage_flag) {
-        print_usage();
-        return 0;
-    }
-    init();
-    short accel[3], gyro[3], sensors[1];
-    long quat[4];
-    unsigned long timestamp;
-    unsigned char more[0];
-    struct pollfd fdset[1];
-    char buf[1];
-
-    // File descriptor for the GPIO interrupt pin
-    int gpio_fd = open(GPIO_INT_FILE, O_RDONLY | O_NONBLOCK);
-
-    // Create an event on the GPIO value file
-    memset((void*)fdset, 0, sizeof(fdset));
-    fdset[0].fd = gpio_fd;
-    fdset[0].events = POLLPRI;
-
-    while (1){
-        // Blocking poll to wait for an edge on the interrupt
-        if(!no_interrupt_flag) {
-            poll(fdset, 1, -1);
-        }
-
-        if (no_interrupt_flag || fdset[0].revents & POLLPRI) {
-            // Read the file to make it reset the interrupt
-            if(!no_interrupt_flag) {
-                read(fdset[0].fd, buf, 1);
-			}
-
-            int fifo_read = dmp_read_fifo(gyro, accel, quat, &timestamp, sensors, more);
-            if (fifo_read != 0) {
-                //printf("Error reading fifo.\n");
-                continue;
-            }
-
-            float angles[NOSENTVALS];
-            rescale_l(quat, angles+9, QUAT_SCALE, 4);
-
-            // rescale the gyro and accel values received from the IMU from longs that the
-            // it uses for efficiency to the floats that they actually are and store these values in the angles array
-            rescale_s(gyro, angles+3, GYRO_SCALE, 3);
-            rescale_s(accel, angles+6, ACCEL_SCALE, 3);
-            // turn the quaternation (that is already in angles) into euler angles and store it in the angles array
-            euler(angles+9, angles);
-            if(!silent_flag && verbose_flag) {
-                printf("Yaw: %+5.1f\tPitch: %+5.1f\tRoll: %+5.1f\n", angles[0]*180.0/PI, angles[1]*180.0/PI, angles[2]*180.0/PI);
-            }
-        }
-    }
-}*/
-
-void parse_args(int argc, char** argv) {
-    int ch, opt_count;
-    no_interrupt_flag = 0;
-    verbose_flag = 0;
-    silent_flag = 0;
-    print_usage_flag = 0;
-    no_broadcast_flag = 0;
-    //flag i for no interrupt, v for no verbose
-    while((ch=getopt(argc, argv, "ivsbo:h?")) != -1) {
-        switch(ch) {
-            case 'i': no_interrupt_flag=1; break;
-            case 'v': verbose_flag=1; break;
-            case 's': silent_flag=1; break;
-            case 'b': no_broadcast_flag=1; break;
-            case 'o':
-                // Parse the orientation matrix
-                //deleteopt_count = sscanf(optarg, "%hhi,%hhi,%hhi,%hhi,%hhi,%hhi,%hhi,%hhi,%hhi", gyro_orientation, gyro_orientation+1,
-                 //         gyro_orientation+2, gyro_orientation+3, gyro_orientation+4, gyro_orientation+5,
-                 //         gyro_orientation+6, gyro_orientation+7, gyro_orientation+8);
-                if (opt_count != 9) {
-                    printf("Must supply 9 comma separated values to the orientation option.\n");
-                    exit(-1); // Exit because we don't know what the behaviour will be!
-                }
-                break;
-            case 'h':
-            case '?': print_usage_flag=1; break;
-        }
-    }
-}
-
-void print_usage() {
-    printf("DropBoneImu- software interface and broadcast client for MPU 6050:\n");
-    printf("Usage: dropboneimu [-i] [-v] [-s] [-b] [-h, -?]\n\n");
-    printf("Arguments:\n");
-    printf("-i\tDisable interrupt pin. Will make code run if not wired up with interrupt pin\n");
-    printf("-v\tVerbose mode. Print out yaw, pitch and roll as they are received\n");
-    printf("-s\tSilent mode. Do not print anything\n");
-    printf("-b\tNo broadcasts. Stops the udp server from broadcasting information received from the MPU over UDP\n");
-    printf("-o\tOrientation matrix of the robot coordinates relative to MPU 6050 coordinates.\n\t9 comma separated values representing X, Y and Z vectors of robot axes.\n");
-    printf("-h, -?\tDisplay this usage message, then exit\n");
-}
-
 int init(){
     open_bus();
     unsigned char whoami=0;
     i2c_read(MPU6050_ADDR, MPU6050_WHO_AM_I, 1, &whoami);
-    if(!silent_flag) {
-        printf("WHO_AM_I: %x\n", whoami);
-    }
+
+	printf("WHO_AM_I: %x\n", whoami);
+
     struct int_param_s int_param;
-    if(!silent_flag) {
-        printf("MPU init: %i\n", mpu_init(&int_param));
-        printf("MPU sensor init: %i\n", mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL));
-        printf("MPU configure fifo: %i\n", mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL));
-        printf("DMP firmware: %i\n ",dmp_load_motion_driver_firmware());
-        printf("DMP orientation: %i\n ",dmp_set_orientation(
-            inv_orientation_matrix_to_scalar(gyro_orientation)));
-    }
+
+	printf("MPU init: %i\n", mpu_init(&int_param));
+    printf("MPU sensor init: %i\n", mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL));
+    printf("MPU configure fifo: %i\n", mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL));
+    printf("DMP firmware: %i\n ",dmp_load_motion_driver_firmware());
+    printf("DMP orientation: %i\n ",dmp_set_orientation(
+    inv_orientation_matrix_to_scalar(gyro_orientation)));
+
     unsigned short dmp_features = DMP_FEATURE_6X_LP_QUAT | DMP_FEATURE_TAP | DMP_FEATURE_SEND_RAW_ACCEL | DMP_FEATURE_SEND_CAL_GYRO | DMP_FEATURE_GYRO_CAL;
-    if(!silent_flag) {
-        printf("DMP feature enable: %i\n", dmp_enable_feature(dmp_features));
-        printf("DMP set fifo rate: %i\n", dmp_set_fifo_rate(DEFAULT_MPU_HZ));
-        printf("DMP enable %i\n", mpu_set_dmp_state(1));
-    }
-    if(!no_interrupt_flag) {
-        mpu_set_int_level(1); // Interrupt is low when firing
-        dmp_set_interrupt_mode(DMP_INT_CONTINUOUS); // Fire interrupt on new FIFO value
-	}
+
+    printf("DMP feature enable: %i\n", dmp_enable_feature(dmp_features));
+    printf("DMP set fifo rate: %i\n", dmp_set_fifo_rate(DEFAULT_MPU_HZ));
+    printf("DMP enable %i\n", mpu_set_dmp_state(1));
+
     return 0;
 }
 
 int i2c_write(unsigned char slave_addr, unsigned char reg_addr,
         unsigned char length, unsigned char const *data){
+
     unsigned char tmp[length+1];
     tmp[0] = reg_addr;
     memcpy(tmp+1, data, length);
