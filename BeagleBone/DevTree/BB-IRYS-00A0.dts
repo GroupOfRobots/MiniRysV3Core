@@ -21,27 +21,38 @@
 	/* state the resources this cape uses */
 	exclusive-use =
 		/* the pin header uses */
-		"P9.19",	/* i2c2_sda */
-		"P9.20",	/* i2c2_scl */
-		"P9.11", 	/* Motor Left Enable	*/
-		"P9.12", 	/* Motor Right Direction	*/
-		"P9.13", 	/* Motor Left Step	*/
-		"P9.14", 	/* Motor Right Step */
-		"P9.15", 	/* Motor Left Direction	*/
-		"P9.16", 	/* Motor Right Enable   */
-		"P9.28", 	/* SPI1_CS0 	*/
-		"P9.29", 	/* SPI1_MISO   */
-		"P9.30", 	/* SPI1_MOSI	*/
-		"P9.31", 	/* SPI1_SCLK	*/
-		"P9.36", 	/* AIN5        */
-		"P9.38", 	/* AIN3        */
-		"P9.40", 	/* AIN1        */
-        	"P8.11", 	/* Motor Left M0* /
-        	"P8.13", 	/* Motor Left M1 */
-        	"P8.17", 	/* Motor Right M0 */
-        	"P8.19", 	/* Motor Right M1 */
+		"P9.19",	/* i2c2_sda 		*/
+		"P9.20",	/* i2c2_scl 		*/
+
+		"P9.14", 	/* Motor Right Enable 	*/
+		"P9.15", 	/* Motor Left Enable	*/
+		"P9.28", 	/* SPI1_CS0 		*/
+		"P9.29", 	/* SPI1_MISO   		*/
+		"P9.30", 	/* SPI1_MOSI		*/
+		"P9.31", 	/* SPI1_SCLK		*/
+		"P9.36", 	/* AIN5        		*/
+		"P9.38", 	/* AIN3        		*/
+		"P9.40", 	/* AIN1        		*/
+ 
+		"P8.39", 	/* Motor Left Direction	*/
+		"P8.40", 	/* Motor Left Step	*/
+		"P8.41", 	/* Motor Left M0	*/
+		"P8.42", 	/* Motor Left M1	*/
+		"P8.43", 	/* Motor Right Direction*/
+		"P8.44", 	/* Motor Right Step	*/
+		"P8.45", 	/* Motor Right M0	*/
+		"P8.46", 	/* Motor Right M1	*/
+
+		"P8.27", 	/* Sonar Trigger 	*/
+		"P8.28", 	/* Sonar 1 Echo		*/
+		"P8.29", 	/* Sonar 2 Echo		*/
+		"P8.30", 	/* Sonar 3 Echo		*/
+
 		/* the hardware ip uses */
+		"pru0",
+		"pru1",
 		"i2c2";
+
 
 	fragment@0 {
 		target = <&am33xx_pinmux>;
@@ -63,20 +74,31 @@
                 		>;
             		};				
 
-			stepper_pins: pinmux_stepper_pins{
+			gpio_pins: pinmux_gpio_pins{
 				pinctrl-single,pins = <
 
-				    	0x034 0x07 // P8_11 (22) = LeftM0 		= GPIO1_13	
-				    	0x024 0x07 // P8_13 (24) = LeftM1	 	= GPIO0_23
-					0x02C 0x07 // P8_17 (6)  = RightM0	 	= GPIO0_27
-				    	0x020 0x07 // P8_19 (25) = RightM1	 	= GPIO0_22
+					0x048 0x07 // P9_14 = Motor Right Enable  	= GPIO0_50
+					0x040 0x07 // P9_15 = Motor Left Enable 	= GPIO1_48
 
-					0x070 0x07 // P9_11 = Motor Left Enable  	= GPIO0_30
-					0x078 0x07 // P9_12 = Motor Right Direction 	= GPIO1_60
-					0x074 0x07 // P9_13 = Motor Left Step  		= GPIO0_31
-					0x048 0x07 // P9_14 = Motor Right Step  	= GPIO0_50
-					0x040 0x07 // P9_15 = Motor Left Direction 	= GPIO1_48
-					0x04C 0x07 // P9_16 = Motor Right Enable  	= GPIO0_51
+
+				>;
+			};
+
+			pru1_pins: pinmux_pru1_pins{
+				pinctrl-single,pins = <
+
+				    	0x0B8 0x05 // P9_39 = Motor Left Direction 	= 6	
+				    	0x0BC 0x05 // P9_40 = Motor Left Step	 	= 7
+					0x0B0 0x05 // P9_41 = Motor Left M0	 	= 4
+				    	0x0B4 0x05 // P9_42 = Motor Left M1	 	= 5
+					0x0A8 0x05 // P9_43 = Motor Right Direction  	= 2
+					0x0AC 0x05 // P9_44 = Motor Right Step	 	= 3
+					0x0A0 0x05 // P9_45 = Motor Right M0  		= 0
+					0x0A4 0x05 // P9_46 = Motor Right M1	  	= 1
+					0x0E0 0x05 // P9_27 = Sonar Trigger	 	= 8
+					0x0E8 0x26 // P9_28 = Sonar 1 Echo	  	= 10
+					0x0E4 0x26 // P9_29 = Sonar 2 Echo	 	= 9
+					0x0EC 0x26 // P9_30 = Sonar 3 Echo	  	= 11
 
 
 				>;
@@ -142,5 +164,15 @@
 		    };
 		};
 	};
+
+ 	  // This enables the PRU and assigns the GPIO pins to it for use in EGP mode.  
+	fragment@4 {  
+    		target = <&pruss>;  
+    		__overlay__ {  
+      			status = "okay";  
+      			pinctrl-names = "default";  
+      			pinctrl-0 = <&pru1_pins>;  
+    		};  
+   	};  
 
 };
