@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
   }
 
   prussdrv_init();
-  if (prussdrv_open(PRU_EVTOUT_0) == -1) {
+  if (prussdrv_open(PRU_EVTOUT_1) == -1) {
     printf("prussdrv_open() failed\n");
     return 1;
   }
@@ -31,12 +31,12 @@ int main(int argc, char **argv) {
 
   printf("Executing program and waiting for termination\n");
   if (argc == 3) {
-    if (prussdrv_load_datafile(0 /* PRU0 */, argv[2]) < 0) {
+    if (prussdrv_load_datafile(1 /* PRU1 */, argv[2]) < 0) {
       fprintf(stderr, "Error loading %s\n", argv[2]);
       exit(-1);
     }
   }
-  if (prussdrv_exec_program(0 /* PRU0 */, argv[1]) < 0) {
+  if (prussdrv_exec_program(1 /* PRU1 */, argv[1]) < 0) {
     fprintf(stderr, "Error loading %s\n", argv[1]);
     exit(-1);
   }
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
   prussdrv_pru_wait_event(PRU_EVTOUT_0);
   printf("All done\n");
 
-  prussdrv_pru_disable(0 /* PRU0 */);
+  prussdrv_pru_disable(1 /* PRU0 */);
   prussdrv_exit();
 
   return 0;

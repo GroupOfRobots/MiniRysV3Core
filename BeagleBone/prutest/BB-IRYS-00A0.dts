@@ -40,10 +40,11 @@
 		"P8.44", 	/* Motor Right Step	*/
 		"P8.45", 	/* Motor Right M0	*/
 		"P8.46", 	/* Motor Right M1	*/
+
 		"P8.27", 	/* Sonar Trigger 	*/
 		"P8.28", 	/* Sonar 1 Echo		*/
 		"P8.29", 	/* Sonar 2 Echo		*/
-		"P8.30"; 	/* Sonar 3 Echo		*/
+		"P8.30", 	/* Sonar 3 Echo		*/
 
 
 	fragment@0 {
@@ -79,18 +80,20 @@
 			pruicss_pins: pinmux_pruicss_pins{
 				pinctrl-single,pins = <
 
-				    	0x0B8 0x05 // P8_39 = Motor Left Direction 	= 6	
-				    	0x0BC 0x05 // P8_40 = Motor Left Step	 	= 7
-					0x0B0 0x05 // P8_41 = Motor Left M0	 	= 4
-				    	0x0B4 0x05 // P8_42 = Motor Left M1	 	= 5
-					0x0A8 0x05 // P8_43 = Motor Right Direction  	= 2
-					0x0AC 0x05 // P8_44 = Motor Right Step	 	= 3
-					0x0A0 0x05 // P8_45 = Motor Right M0  		= 0
-					0x0A4 0x05 // P8_46 = Motor Right M1	  	= 1
-					0x0E0 0x05 // P8_27 = Sonar Trigger	 	= 8
-					0x0E8 0x26 // P8_28 = Sonar 1 Echo	  	= 10
-					0x0E4 0x26 // P8_29 = Sonar 2 Echo	 	= 9
-					0x0EC 0x26 // P8_30 = Sonar 3 Echo	  	= 11
+				    	0x0B8 0x05 // P9_39 = Motor Left Direction 	= 6	
+				    	0x0BC 0x05 // P9_40 = Motor Left Step	 	= 7
+					0x0B0 0x05 // P9_41 = Motor Left M0	 	= 4
+				    	0x0B4 0x05 // P9_42 = Motor Left M1	 	= 5
+					0x0A8 0x05 // P9_43 = Motor Right Direction  	= 2
+					0x0AC 0x05 // P9_44 = Motor Right Step	 	= 3
+					0x0A0 0x05 // P9_45 = Motor Right M0  		= 0
+					0x0A4 0x05 // P9_46 = Motor Right M1	  	= 1
+					0x0E0 0x05 // P9_27 = Sonar Trigger	 	= 8
+					0x0E8 0x26 // P9_28 = Sonar 1 Echo	  	= 10
+					0x0E4 0x26 // P9_29 = Sonar 2 Echo	 	= 9
+					0x0EC 0x26 // P9_30 = Sonar 3 Echo	  	= 11
+
+
 				>;
 			};
 		};
@@ -110,6 +113,7 @@
 			#size-cells = <0>;
 
 			/* add any i2c devices on the bus here */
+
 		};
 	};
 
