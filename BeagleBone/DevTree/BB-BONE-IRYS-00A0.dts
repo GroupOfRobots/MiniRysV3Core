@@ -36,14 +36,10 @@
 	"pr1_pru1_pru_r30_0",
 	"P8.46", /* Motor Right M1	*/
 	"pr1_pru1_pru_r30_1",
-	"P8.27", /* Sonar Trigger 	*/
-	"pr1_pru1_pru_r30_8",
-	"P8.28", /* Sonar 1 Echo	*/
-	"pr1_pru1_pru_r31_10",
-	"P8.29", /* Sonar 2 Echo	*/
-	"pr1_pru1_pru_r31_9",
-	"P8.30", /* Sonar 3 Echo	*/
-	"pr1_pru1_pru_r31_11",
+	"P8.12", /* Sonar Trigger 	*/
+	"P8.11", /* Sonar 1 Echo	*/
+	"P8.14", /* Sonar 2 Echo	*/
+	"P8.15", /* Sonar 3 Echo	*/
 
         /* the pin header P9 uses */
 	"P9.14", /* Motor Right Enable 	*/
@@ -79,10 +75,10 @@
 			0x0ac 0xd // P8_44 = Motor Right Step	 	= 3
 			0x0a0 0xd // P8_45 = Motor Right M0  		= 0
 			0x0a4 0xd // P8_46 = Motor Right M1	  	= 1
-			0x0e0 0xd // P8_27 = Sonar Trigger	 	= 8
-			0x0e8 0x26 // P8_28 = Sonar 1 Echo	  	= 10
-			0x0e4 0x26 // P8_29 = Sonar 2 Echo	 	= 9
-			0x0ec 0x26 // P8_30 = Sonar 3 Echo	  	= 11
+			0x030 0x7 // P8_12 = Sonar Trigger	 	
+			0x034 0x27 // P8_11 = Sonar 1 Echo	  	
+			0x028 0x27 // P8_14 = Sonar 2 Echo	 	
+			0x03c 0x27 // P8_15 = Sonar 3 Echo	  	
                 >;
             };	
 
