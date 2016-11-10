@@ -41,6 +41,8 @@ int main(int argc, char **argv) {
     exit(-1);
   }
 
+
+
   // Wait for the PRU to let us know it's done
   prussdrv_pru_wait_event(PRU_EVTOUT_0);
   printf("All done\n");
