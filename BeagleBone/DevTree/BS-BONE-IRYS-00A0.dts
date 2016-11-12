@@ -27,9 +27,9 @@
 	"P8.46", /* Motor Right M1	*/
 	"pr1_pru1_pru_r30_1",
 	//"P8.12", /* Sonar Trigger 	*/
-	"P8.11", /* Sonar 1 Echo	*/
-	"P8.14", /* Sonar 2 Echo	*/
-	"P8.15"; /* Sonar 3 Echo	*/
+	//"P8.11", /* Sonar 1 Echo	*/
+	//"P8.14", /* Sonar 2 Echo	*/
+	//"P8.15"; /* Sonar 3 Echo	*/
 
     fragment@0 {
         target = <&am33xx_pinmux>;
@@ -45,9 +45,9 @@
 			0x0a0 0xd // P8_45 = Motor Right M0  		= 0
 			0x0a4 0xd // P8_46 = Motor Right M1	  	= 1
 			//0x030 0x7  P8_12 = Sonar Trigger	 	
-			0x034 0x27 // P8_11 = Sonar 1 Echo	  	
-			0x028 0x27 // P8_14 = Sonar 2 Echo	 	
-			0x03c 0x27 // P8_15 = Sonar 3 Echo	  	
+			//0x034 0x27 // P8_11 = Sonar 1 Echo	  	
+			//0x028 0x27 // P8_14 = Sonar 2 Echo	 	
+			//0x03c 0x27 // P8_15 = Sonar 3 Echo	  	
 		>;
             };
         };
