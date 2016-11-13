@@ -8,14 +8,6 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include blacklib/BlackTime/subdir.mk
--include blacklib/BlackSPI/subdir.mk
--include blacklib/BlackPWM/subdir.mk
--include blacklib/BlackI2C/subdir.mk
--include blacklib/BlackGPIO/subdir.mk
--include blacklib/BlackADC/subdir.mk
--include blacklib/subdir.mk
--include StepperDriver/subdir.mk
 -include MPU6050/subdir.mk
 -include subdir.mk
 -include objects.mk
