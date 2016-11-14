@@ -1,6 +1,4 @@
 /*
- * Copyright (C) 2013 Intelligent Agent AS	<elias@iagent.no>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
@@ -19,31 +17,9 @@
 
     /* state the resources this cape uses */
     exclusive-use =
-        /* the pin header P8 uses */
-	"P8.39", /* Motor Left Direction*/
-	"pr1_pru1_pru_r30_6",
-	"P8.40", /* Motor Left Step	*/
-	"pr1_pru_pru1_r30_7",
-	"P8.41", /* Motor Left M0	*/
-	"pr1_pru1_pru_r30_4",
-	"P8.42", /* Motor Left M1	*/
-	"pr1_pru1_pru_r30_5",
-	"P8.43", /* Motor Right Direction*/
-	"pr1_pru1_pru_r30_2",
-	"P8.44", /* Motor Right Step	*/
-	"pr1_pru1_pru_r30_3",
-	"P8.45", /* Motor Right M0	*/
-	"pr1_pru1_pru_r30_0",
-	"P8.46", /* Motor Right M1	*/
-	"pr1_pru1_pru_r30_1",
-	"P8.12", /* Sonar Trigger 	*/
-	"P8.11", /* Sonar 1 Echo	*/
-	"P8.14", /* Sonar 2 Echo	*/
-	"P8.15", /* Sonar 3 Echo	*/
+
 
         /* the pin header P9 uses */
-	"P9.14", /* Motor Right Enable 	*/
-	"P9.15", /* Motor Left Enable	*/
         "P9.28", /* SPI1_CS0 	*/
         "P9.29", /* SPI1_MISO   */
         "P9.30", /* SPI1_MOSI	*/
@@ -52,6 +28,7 @@
         "P9.35", /* AIN6        */
         "P9.36", /* AIN5        */
         "P9.42"; /* SPI1_CS1	*/
+	//include sonar pins here
 
     fragment@0 {
         target = <&am33xx_pinmux>;
@@ -65,29 +42,16 @@
                     0x164 0x12  /* P9_42 = GPIO0_7 =  eCAP0_in_PWM0_out.gpio0[7] , OUTPUT_PULLUP | MODE2 */
                 >;
             };					
-            pruicss_irys_pins: pinmux_pruicss_irys_pins{
+            irys_pins: pinmux_pruicss_irys_pins{
                 pinctrl-single,pins = <
-			0x0b8 0xd // P8_39 = Motor Left Direction 	= 6	
-		    	0x0bc 0xd // P8_40 = Motor Left Step	 	= 7
-			0x0b0 0xd // P8_41 = Motor Left M0	 	= 4
-		    	0x0b4 0xd // P8_42 = Motor Left M1	 	= 5
-			0x0a8 0xd // P8_43 = Motor Right Direction  	= 2
-			0x0ac 0xd // P8_44 = Motor Right Step	 	= 3
-			0x0a0 0xd // P8_45 = Motor Right M0  		= 0
-			0x0a4 0xd // P8_46 = Motor Right M1	  	= 1
-			0x030 0x7 // P8_12 = Sonar Trigger	 	
-			0x034 0x27 // P8_11 = Sonar 1 Echo	  	
-			0x028 0x27 // P8_14 = Sonar 2 Echo	 	
-			0x03c 0x27 // P8_15 = Sonar 3 Echo	  	
+
+			0x030 0x7 // P8_12 = Sonar Trigger change	 	
+			0x034 0x27 // P8_11 = Sonar 1 Echo change  	
+			0x028 0x27 // P8_14 = Sonar 2 Echo change	 	
+			0x03c 0x27 // P8_15 = Sonar 3 Echo change	  	
                 >;
             };	
 
-            gpio_irys_pins: pinmux_gpio_irys_pins{
-                pinctrl-single,pins = <
-			0x048 0x07 // P9_14 = Motor Right Enable  	= GPIO0_50
-			0x040 0x07 // P9_15 = Motor Left Enable 	= GPIO1_48
-                >;
-            };
         };
     };
 
@@ -136,7 +100,7 @@
         __overlay__ {			
             status = "okay";
             adc {
-                ti,adc-channels = <4 5 6 7>;
+                ti,adc-channels = <4 5 6 >;
             };
         };
     };

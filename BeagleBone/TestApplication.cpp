@@ -124,7 +124,7 @@ void readData() {
     }
 }
 
-
+// microstep (1=full, 2=half, 3=1/4, 4=1/8)
 int setSpeed(int leftspeed, int rightspeed,int microstep){
 	struct pollfd pollfds[1];
 
@@ -207,8 +207,8 @@ int main(void)
 	    setMotors(1); //enable motor
 	    for (int i=0;i<100;i++){
 	    	readData(); // read data from IMU
-	    	if(ypr[2]>0)setSpeed(5000,5000,1); //Set speed for motors
-	    	else setSpeed(-5000,-5000,1);
+	    	if(ypr[2]>0)setSpeed(5000,5000,3); //Set speed for motors
+	    	else setSpeed(-5000,-5000,2);
 	    	usleep(100000);
 	    }
 	    setMotors(0); //disable motor
