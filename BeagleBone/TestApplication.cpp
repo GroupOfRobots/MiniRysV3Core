@@ -199,6 +199,19 @@ void setMotors(int enable){ //function for enable/disable motors.
    fs.close();
 }
 
+int readAnalog(int enable){ //function for enable/disable motors.
+   std::ifstream fs;
+   char val[4];     //holds up to 4 digits for ADC value
+
+   fs.open("/sys/devices/platform/ocp/44e0d000.tscadc/TI-am335x-adc/iio:device0",std::ifstream::in);
+   if(fs.fail())throw 5;
+
+   fs.read(val, 4);
+   fs.close();
+
+   return atoi(val);
+}
+
 int main(void)
 {
 
