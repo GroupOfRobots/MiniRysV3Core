@@ -36,17 +36,17 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <string.h>
-#include <sys/poll.h>
-#include <fstream>
 #include <math.h>
+#include <chrono>
+
+#include "Motors/motors.h"
+#include "Battery/battery.h"
 #include "MPU6050/MPU6050_6Axis_MotionApps20.h"
 
-#define MAX_BUFFER_SIZE		512
-char readBuf[MAX_BUFFER_SIZE];
-
 MPU6050 mpu;
+Motors silniki;
+Battery lipol;
 
 bool dmpReady = false;  // set true if DMP init was successful
 uint8_t devStatus;      // return status after each device operation (0 = success, !0 = error)
@@ -57,16 +57,6 @@ Quaternion q;           // [w, x, y, z]         quaternion container
 VectorFloat gravity;    // [x, y, z]            gravity vector
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container
 
-
-struct data_frame{
-	unsigned int speedl;
-	unsigned int speedr;
-	uint8_t dirl;
-	uint8_t dirr;
-	uint8_t mstep;
-};
-
-#define DEVICE_NAME		"/dev/rpmsg_pru31"
 
 void setup() {
     // initialize device
@@ -124,107 +114,64 @@ void readData() {
     }
 }
 
-// microstep (1=full, 2=half, 3=1/4, 4=1/8)
-int setSpeed(int leftspeed, int rightspeed,int microstep){
-	struct pollfd pollfds[1];
-
-		int result = 0;
-		struct data_frame *sended;
-		sended = (struct data_frame*)malloc(sizeof(struct data_frame));
-		sended->speedl = abs(leftspeed);
-		sended->speedr = abs(rightspeed);
-		if(leftspeed>0)sended->dirl = 0;
-		else sended->dirl = 1;
-		if(rightspeed>0)sended->dirr = 0;
-		else sended->dirr = 1;
-		sended->mstep = microstep;
-
-		/* Open the rpmsg_pru character device file */
-		pollfds[0].fd = open(DEVICE_NAME, O_RDWR);
-
-		/*
-		 * If the RPMsg channel doesn't exist yet the character device
-		 * won't either.
-		 * Make sure the PRU firmware is loaded and that the rpmsg_pru
-		 * module is inserted.
-		 */
-		if (pollfds[0].fd < 0) {
-			printf("Failed to open %s\n", DEVICE_NAME);
-			return -1;
-		}
-
-		/* The RPMsg channel exists and the character device is opened */
-		printf("Opened %s, sending %d messages\n\n", DEVICE_NAME, 1);
-
-		/* Send data structure to the PRU through the RPMsg channel */
-		result = write(pollfds[0].fd, sended, 13);
-		if (result > 0)
-			printf("Message %d: Sent to PRU\n", 1);
-
-		//result = read(pollfds[0].fd, readBuf, MAX_BUFFER_SIZE);
-		//if (result > 0)
-		//	printf("Message %d received from PRU:%s\n\n", 1, readBuf);
-
-		/* Received all the messages the example is complete */
-		//printf("Received %d messages, closing %s\n", 1, DEVICE_NAME);
-
-		/* Close the rpmsg_pru character device file */
-		close(pollfds[0].fd);
-		return 0;
-}
-
-void setMotors(int enable){ //function for enable/disable motors.
-   std::ofstream fs;
-
-   fs.open("/sys/class/gpio/export",std::ofstream::out);
-   if(fs.fail())throw 5;
-   fs << "78";
-   fs.close();
-   fs.open("/sys/class/gpio/gpio78/direction",std::ofstream::out);
-   fs << "out";
-   fs.close();
-   fs.open("/sys/class/gpio/export",std::ofstream::out);
-   fs << "79";
-   fs.close();
-   fs.open("/sys/class/gpio/gpio79/direction",std::ofstream::out);
-   fs << "out";
-   fs.close();
-   fs.open("/sys/class/gpio/gpio78/value",std::ofstream::out);
-   if(enable)fs << "0";
-   else fs << "1";
-   fs.close();
-   fs.open("/sys/class/gpio/gpio79/value",std::ofstream::out);
-   if(enable)fs << "0";
-   else fs << "1";
-   fs.close();
-}
-
-int readAnalog(int enable){ //function for enable/disable motors.
-   std::ifstream fs;
-   char val[4];     //holds up to 4 digits for ADC value
-
-   fs.open("/sys/devices/platform/ocp/44e0d000.tscadc/TI-am335x-adc/iio:device0",std::ifstream::in);
-   if(fs.fail())throw 5;
-
-   fs.read(val, 4);
-   fs.close();
-
-   return atoi(val);
-}
-
 int main(void)
 {
 
+
+		int nowyspeed=0;
+		int speed=0;
+		int motorspeed=0;
+		float angle;
 		setup(); // initialize IMU
 	    usleep(100000);
-	    setMotors(1); //enable motor
-	    for (int i=0;i<100;i++){
+	    silniki.enable(); //enable motor
+	    if(!lipol.isGood())printf("niski poziom napiecia baterii");
+
+	    silniki.setSpeed(5500,5500,1);
+	    usleep(100000);
+	    usleep(100000);
+	    usleep(100000);
+	    usleep(100000);
+
+	    silniki.setSpeed(-5500,-5500,1);
+	    usleep(100000);
+	    usleep(100000);
+	    usleep(100000);
+	    usleep(100000);
+	    usleep(35000);
+
+
+	    for(int i=0;i<800;i++){
 	    	readData(); // read data from IMU
-	    	if(ypr[2]>0)setSpeed(5000,5000,3); //Set speed for motors
-	    	else setSpeed(-5000,-5000,2);
-	    	usleep(100000);
+	    	angle += ypr[2];
+	    	usleep(1250);
+	    	readData(); // read data from IMU
+	    	angle += ypr[2];
+	    	usleep(1250);
+	    	readData(); // read data from IMU
+	    	angle += ypr[2];
+	    	usleep(1250);
+	    	readData(); // read data from IMU
+	    	angle += ypr[2];
+	    	usleep(1250);
+	    	if(angle/4!=0.0)nowyspeed = (angle-0.04)*70;
+	    	else nowyspeed = 1;
+	    	if ((speed - nowyspeed) > 20)
+				speed -= 20;
+			else if ((speed - nowyspeed) < -20)
+				speed += 20;
+			else
+				speed = nowyspeed;
+	    	printf("%d/n",speed);
+	    	if(speed!=0)motorspeed = 200000/speed;
+	    	else motorspeed = 200000;
+	    	if(speed == 1)motorspeed =0;
+	    	if(motorspeed<0&&motorspeed>-2000)motorspeed = -2000; //move speed limitations to motor class
+	    	if(motorspeed>0&&motorspeed<2000)motorspeed = 2000;
+	    	silniki.setSpeed(motorspeed,motorspeed,2); //Set speed for motors;
+	    	angle =0.0;
 	    }
-	    setMotors(0); //disable motor
+	    silniki.disable(); //disable motor
 
 	return 0;
 }

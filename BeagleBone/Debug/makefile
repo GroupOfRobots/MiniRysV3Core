@@ -8,7 +8,9 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include Motors/subdir.mk
 -include MPU6050/subdir.mk
+-include Battery/subdir.mk
 -include subdir.mk
 -include objects.mk
 
