@@ -9,6 +9,11 @@
 #include <fstream>
 
 #define MAX_BUFFER_SIZE		512
+#define MAX_ACCELERATION	20
+#define MAX_MOTOR_SPEED		4000
+#define MIN_MOTOR_SPEED		4000000
+#define MAX_USER_SPEED		1000
+#define MIN_USER_SPEED		0
 #define DEVICE_NAME		"/dev/rpmsg_pru31"
 
 struct data_frame{
@@ -26,11 +31,15 @@ private:
 	char readBuf[MAX_BUFFER_SIZE];
 	int result;
 	std::ofstream fs;
+	int userspeedleft;
+	int userspeedright;
+	int	maxmotorspeed;
+	int minmotorspeed;
 
 public:
+
 	Motors();
 	~Motors();
-
 	int setSpeed(int,int,int);
 	void enable();
 	void disable();

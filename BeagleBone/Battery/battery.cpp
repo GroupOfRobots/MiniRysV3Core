@@ -35,6 +35,6 @@ int Battery::isGood(){
 }
 int Battery::getState(){
 
-	//calculate battery state in percents;
+	//calculate battery state in %;
 	return 0;
 }
