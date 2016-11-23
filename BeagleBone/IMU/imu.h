@@ -21,6 +21,7 @@ public:
 	float getPitch();
 	float getRoll();
 	float getYaw();
+	void resetFIFO();
 };
 
 #endif

@@ -10,6 +10,7 @@ RM := rm -rf
 -include sources.mk
 -include Motors/subdir.mk
 -include IMU/subdir.mk
+-include Controller/subdir.mk
 -include Battery/subdir.mk
 -include subdir.mk
 -include objects.mk

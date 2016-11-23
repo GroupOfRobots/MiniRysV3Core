@@ -39,14 +39,16 @@
 #include <chrono>
 #include <thread>
 
-#include "Motors/motors.h"
-#include "Battery/battery.h"
-#include "IMU/imu.h"
+#include "Motors/motors.h" //motors class
+#include "Battery/battery.h" //Battery measurement class
+#include "IMU/imu.h" // angle measurement class
+#include "Controller/controller.h" //angle & speed control
 
 
 Motors silniki;
 Battery lipol;
 Imu imu;
+Controller pipd;
 float angle;
 int nowyspeed=0;
 

@@ -71,3 +71,7 @@ float Imu::getYaw(){
 	readData();
 	return ypr[0];
 }
+
+void Imu::resetFIFO(){
+	mpu.resetFIFO();
+}
