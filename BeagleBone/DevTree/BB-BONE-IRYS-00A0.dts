@@ -28,6 +28,7 @@
         "P9.35", /* AIN6        */
         "P9.36", /* AIN5        */
         "P9.42"; /* SPI1_CS1	*/
+	"P8.7";  /* SONAR TRIGGER to do */
 	//include sonar pins here
 
     fragment@0 {

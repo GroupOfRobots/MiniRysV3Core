@@ -72,14 +72,14 @@ int main(void)
 {
 	std::thread t(&balancing);
 
-	int state=0; // 0 laying front, 1 laying back, 2 balancing.
+	int state=0; // 0 laying front, 1 laying back, 2 balancing
 	imu.setup(); // initialize IMU
 	usleep(100000);
 	silniki.enable(); //enable motor
 	if(!lipol.isGood())printf("niski poziom napiecia baterii");
 
 	if(imu.getRoll()>0.8)state = 0;
-	else if (imu.getRoll()<-0.8)state = 1;
+	else if (imu.getRoll()< -0.8)state = 1;
 	else state = 2;
 
 	switch (state){
