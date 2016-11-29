@@ -27,7 +27,7 @@ Motors::~Motors(){
 	this->disable();
 }
 
-int Motors::setSpeed(int leftspeed, int rightspeed,int microstep){
+int Motors::setSpeed(float leftspeed, float rightspeed,int microstep){
 
 	struct pollfd pollfds[1];
 
@@ -67,25 +67,27 @@ int Motors::setSpeed(int leftspeed, int rightspeed,int microstep){
 
 		if(userspeedleft>=0){
 			sended->dirl = 0;
-			sended->speedl = (userspeedleft - MIN_USER_SPEED) * (maxmotorspeed - minmotorspeed) / (MAX_USER_SPEED - MIN_USER_SPEED) + minmotorspeed;
 			if(userspeedleft==0)sended->speedl = 0;
+			else sended->speedl = (int)minmotorspeed*(1/userspeedleft);
 		}
 		else{
 			sended->dirl = 1;
-			sended->speedl = -1*((userspeedleft - MIN_USER_SPEED) * (maxmotorspeed - minmotorspeed) / (MAX_USER_SPEED - MIN_USER_SPEED) + minmotorspeed);
+			sended->speedl = (int)-1*(minmotorspeed*(1/userspeedleft));
 		}
 		if(rightspeed>=0){
 			sended->dirr = 0;
-			sended->speedr = (userspeedright - MIN_USER_SPEED) * (maxmotorspeed - minmotorspeed) / (MAX_USER_SPEED - MIN_USER_SPEED) + minmotorspeed;
 			if(userspeedright==0)sended->speedr = 0;
+			else sended->speedr = (int)minmotorspeed*(1/userspeedright);
 		}
 		else{
 			sended->dirr = 1;
-			sended->speedr = -1*((userspeedright - MIN_USER_SPEED) * (maxmotorspeed - minmotorspeed) / (MAX_USER_SPEED - MIN_USER_SPEED) + minmotorspeed);
+			sended->speedr = (int)-1*(minmotorspeed*(1/userspeedright));
 		}
 
-		sended->mstep = microstep;
+		if(sended->speedl!=0&&sended->speedl<maxmotorspeed)sended->speedl = (unsigned int)maxmotorspeed;
+		if(sended->speedr!=0&&sended->speedr<maxmotorspeed)sended->speedr = (unsigned int)maxmotorspeed;
 
+		sended->mstep = microstep;
 
 		/* Open the rpmsg_pru character device file */
 		pollfds[0].fd = open(DEVICE_NAME, O_RDWR);

@@ -48,7 +48,7 @@
 Motors silniki;
 Battery lipol;
 Imu imu;
-Controller pipd;
+// Controller pid; add timer to use it
 float angle;
 int nowyspeed=0;
 
@@ -62,64 +62,76 @@ void balancing(){
 	usleep(1250);
 	angle += imu.getRoll();
 	usleep(1250);
-	if(angle/4!=0.0)nowyspeed = (angle-0.04)*70;
+	if(angle/4!=0.0)nowyspeed = -1*(angle-0.04)*700;
 
-	silniki.setSpeed(nowyspeed,nowyspeed,2); //Set speed for motors;
-	angle =0.0;
+	silniki.setSpeed(nowyspeed,nowyspeed,4); //Set speed for motors;
+	angle = 0.0;
 }
 
 int main(void)
 {
-	std::thread t(&balancing);
+	//std::thread t(&balancing);
 
 	int state=0; // 0 laying front, 1 laying back, 2 balancing
 	imu.setup(); // initialize IMU
 	usleep(100000);
-	silniki.enable(); //enable motor
-	if(!lipol.isGood())printf("niski poziom napiecia baterii");
+	//if(!lipol.isGood())printf("niski poziom napiecia baterii");
 
-	if(imu.getRoll()>0.8)state = 0;
-	else if (imu.getRoll()< -0.8)state = 1;
+
+
+	if(imu.getRoll()>0.8)state = 1;
+	else if (imu.getRoll()< -0.8)state = 0;
 	else state = 2;
+	imu.resetFIFO();
 
-	switch (state){
-	case 0:
-		silniki.setSpeed(1000,1000,1);
-		usleep(100000);
-		usleep(100000);
-		usleep(100000);
-		usleep(100000);
 
-		silniki.setSpeed(-1000,-1000,1);
-		usleep(100000);
-		usleep(100000);
-		usleep(100000);
-		usleep(100000);
-		usleep(35000);
-		state = 2;
-	break;
-	case 1:
-		silniki.setSpeed(-1000,-1000,1);
-		usleep(100000);
-		usleep(100000);
-		usleep(100000);
-		usleep(100000);
+	while(1){
+		imu.resetFIFO();
 
-		silniki.setSpeed(1000,1000,1);
-		usleep(100000);
-		usleep(100000);
-		usleep(100000);
-		usleep(100000);
-		usleep(35000);
-		state = 2;
+		switch (state){
+		case 0:
+			silniki.setSpeed(950,950,1);
+			usleep(100000);
+			usleep(100000);
+			usleep(100000);
+			usleep(100000);
 
-	break;
-	case 2:
-		t.detach();
-	break;
+			silniki.setSpeed(-950,-950,1);
+			usleep(100000);
+			usleep(100000);
+			usleep(100000);
+			usleep(100000);
+			usleep(35000);
+			state = 2;
+		break;
+		case 1:
+			silniki.setSpeed(-950,-950,1);
+			usleep(100000);
+			usleep(100000);
+			usleep(100000);
+			usleep(100000);
+
+			silniki.setSpeed(950,950,1);
+			usleep(100000);
+			usleep(100000);
+			usleep(100000);
+			usleep(100000);
+			usleep(35000);
+			state = 2;
+
+		break;
+		case 2:
+			//t.detach();
+			balancing();
+		break;
+		}
 	}
 
-	silniki.disable(); //disable motor
+
+	while(1){
+		silniki.setSpeed(1000,1000,3);
+		usleep(100000);
+	}
 
 	return 0;
 }
