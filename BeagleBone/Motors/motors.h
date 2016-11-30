@@ -40,7 +40,7 @@ public:
 
 	Motors();
 	~Motors();
-	int setSpeed(float,float,int);
+	int setSpeed(float,float,int); //speed from -1000 to 1000
 	void enable();
 	void disable();
 };

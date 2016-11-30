@@ -27,5 +27,6 @@ Battery \
 Controller \
 IMU \
 Motors \
+Sonar \
 . \
 

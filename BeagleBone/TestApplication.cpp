@@ -43,11 +43,13 @@
 #include "Battery/battery.h" //Battery measurement class
 #include "IMU/imu.h" // angle measurement class
 #include "Controller/controller.h" //angle & speed control
+#include "Sonar/sonar.h" //distance sensors class
 
 
 Motors silniki;
 Battery lipol;
 Imu imu;
+Sonar hcr;
 // Controller pid; add timer to use it
 float angle;
 int nowyspeed=0;
@@ -122,16 +124,14 @@ int main(void)
 		break;
 		case 2:
 			//t.detach();
-			balancing();
+			//balancing();
+			printf("Message received from PRU:%d\n", hcr.getDistance(1));
+			usleep(35000);
 		break;
 		}
 	}
 
 
-	while(1){
-		silniki.setSpeed(1000,1000,3);
-		usleep(100000);
-	}
 
 	return 0;
 }
