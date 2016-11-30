@@ -10,9 +10,11 @@ private:
 	char buffer[4];
 
 public:
+
 	void readState();
 	int isGood();
 	int getState();
+	int getRaw();
 };
 
 #endif

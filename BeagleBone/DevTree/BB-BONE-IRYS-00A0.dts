@@ -28,8 +28,6 @@
         "P9.35", /* AIN6        */
         "P9.36", /* AIN5        */
         "P9.42"; /* SPI1_CS1	*/
-	"P8.7";  /* SONAR TRIGGER to do */
-	//include sonar pins here
 
     fragment@0 {
         target = <&am33xx_pinmux>;
@@ -43,16 +41,6 @@
                     0x164 0x12  /* P9_42 = GPIO0_7 =  eCAP0_in_PWM0_out.gpio0[7] , OUTPUT_PULLUP | MODE2 */
                 >;
             };					
-            irys_pins: pinmux_pruicss_irys_pins{
-                pinctrl-single,pins = <
-
-			0x030 0x7 // P8_12 = Sonar Trigger change	 	
-			0x034 0x27 // P8_11 = Sonar 1 Echo change  	
-			0x028 0x27 // P8_14 = Sonar 2 Echo change	 	
-			0x03c 0x27 // P8_15 = Sonar 3 Echo change	  	
-                >;
-            };	
-
         };
     };
 
@@ -85,16 +73,6 @@
             };
         };
     };
-
-    fragment@2{
-        target = <&pruss>;
-        __overlay__{
-            status = "okay";
-            pinctrl-names = "default";
-            pinctrl-0 	  = <&pruicss_irys_pins>;
-        };
-    };
-
 
     fragment@3 {
         target = <&tscadc>;

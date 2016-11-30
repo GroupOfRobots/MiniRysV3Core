@@ -2,9 +2,14 @@
 
 Sonar::Sonar(){
 	result = 0;
+	sended = new distance_frame;
 }
 
-int Sonar::getDistance(int nsonar){
+Sonar::~Sonar(){
+	delete sended;
+}
+
+int Sonar::getDistance(distance_sensors nsonar){
 
 	struct pollfd pollfds[1];
 
@@ -28,15 +33,18 @@ int Sonar::getDistance(int nsonar){
 	result = 0;
 
 	/* Send data structure to the PRU through the RPMsg channel */
-	result = write(pollfds[0].fd, "hello", 13);
+	result = write(pollfds[0].fd, "h", 13);
 	if (result > 0)
 		//printf("Message %d: Sent to PRU\n", 1);
 
-	result = read(pollfds[0].fd, readBuf, MAX_BUFFER_SIZE);
+	result = read(pollfds[0].fd, sended, MAX_BUFFER_SIZE);
 	//if (result > 0)
 
 	/* Close the rpmsg_pru character device file */
 	close(pollfds[0].fd);
 
-	return readBuf[0];
+	if(nsonar==1)return sended->front;
+	if(nsonar==2)return sended->back;
+	if(nsonar==3)return sended->top;
+	else return 100000;
 }

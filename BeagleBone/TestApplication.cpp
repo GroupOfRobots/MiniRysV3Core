@@ -74,21 +74,21 @@ int main(void)
 {
 	//std::thread t(&balancing);
 
-	int state=0; // 0 laying front, 1 laying back, 2 balancing
-	imu.setup(); // initialize IMU
+	int state=2; // 0 laying front, 1 laying back, 2 balancing
+	//imu.setup(); // initialize IMU
 	usleep(100000);
-	//if(!lipol.isGood())printf("niski poziom napiecia baterii");
+	if(!lipol.isGood())printf("niski poziom napiecia baterii");
 
 
 
-	if(imu.getRoll()>0.8)state = 1;
-	else if (imu.getRoll()< -0.8)state = 0;
-	else state = 2;
-	imu.resetFIFO();
+	//if(imu.getRoll()>0.8)state = 1;
+	//else if (imu.getRoll()< -0.8)state = 0;
+	//else state = 2;
+	//imu.resetFIFO();
 
 
 	while(1){
-		imu.resetFIFO();
+		//imu.resetFIFO();
 
 		switch (state){
 		case 0:
@@ -125,8 +125,10 @@ int main(void)
 		case 2:
 			//t.detach();
 			//balancing();
-			printf("Message received from PRU:%d\n", hcr.getDistance(1));
-			usleep(35000);
+			silniki.disable();
+			//printf("Message received from PRU:%d\n", hcr.getDistance(distance_sensors::front));
+			printf("ADC5: %d\n",lipol.getRaw());
+			usleep(100000);
 		break;
 		}
 	}
