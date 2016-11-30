@@ -1,2 +1,2 @@
 # RobotCore
-Source code for beaglebone green wireless include device tree overlay and pru firmware
+Source code for beaglebone green wireless includes device tree overlay and hardware libraries
