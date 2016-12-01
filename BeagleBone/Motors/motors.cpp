@@ -45,7 +45,7 @@ int Motors::setSpeed(float leftspeed, float rightspeed,int microstep){
 		else if ((userspeedright - rightspeed) < -MAX_ACCELERATION)
 			userspeedright += MAX_ACCELERATION;
 		else
-			userspeedright = leftspeed;
+			userspeedright = rightspeed;
 
 		if(microstep==1){
 			maxmotorspeed = MAX_MOTOR_SPEED;
@@ -68,26 +68,36 @@ int Motors::setSpeed(float leftspeed, float rightspeed,int microstep){
 		if(userspeedleft>=0){
 			sended->dirl = 0;
 			if(userspeedleft==0)sended->speedl = 0;
-			else sended->speedl = (int)minmotorspeed*(1/userspeedleft);
+			else{
+				userspeedleft = 1/userspeedleft;
+				sended->speedl = (int)minmotorspeed*userspeedleft;
+			}
 		}
 		else{
 			sended->dirl = 1;
-			sended->speedl = (int)-1*(minmotorspeed*(1/userspeedleft));
+			userspeedleft = -1/userspeedleft;
+			sended->speedl = (int)minmotorspeed*userspeedleft;
 		}
 		if(rightspeed>=0){
 			sended->dirr = 0;
 			if(userspeedright==0)sended->speedr = 0;
-			else sended->speedr = (int)minmotorspeed*(1/userspeedright);
+			else {
+				userspeedright = 1/userspeedright;
+				sended->speedr = (int)minmotorspeed*userspeedright;
+			}
 		}
 		else{
 			sended->dirr = 1;
-			sended->speedr = (int)-1*(minmotorspeed*(1/userspeedright));
+			userspeedright = -1/userspeedright;
+			sended->speedr = (int)minmotorspeed*userspeedright;
 		}
 
 		if(sended->speedl!=0&&sended->speedl<maxmotorspeed)sended->speedl = (unsigned int)maxmotorspeed;
 		if(sended->speedr!=0&&sended->speedr<maxmotorspeed)sended->speedr = (unsigned int)maxmotorspeed;
 
 		sended->mstep = microstep;
+
+		printf("r%d,l%d\n",sended->speedr,sended->speedl);
 
 		/* Open the rpmsg_pru character device file */
 		pollfds[0].fd = open(DEVICE_NAME, O_RDWR);

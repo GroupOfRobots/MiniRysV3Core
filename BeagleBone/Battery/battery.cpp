@@ -31,7 +31,7 @@ void Battery::readState(){
 int Battery::isGood(){
 
 	this->readState();
-	if(cellVoltage[0]<1230)return 0;
+	if(cellVoltage[0]<2500)return 0;
 	else return 1;
 }
 int Battery::getState(){

@@ -38,6 +38,9 @@
 #include <string.h>
 #include <chrono>
 #include <thread>
+#include <unistd.h>
+#include <termios.h>
+
 
 #include "Motors/motors.h" //motors class
 #include "Battery/battery.h" //Battery measurement class
@@ -64,73 +67,100 @@ void balancing(){
 	usleep(1250);
 	angle += imu.getRoll();
 	usleep(1250);
-	if(angle/4!=0.0)nowyspeed = -1*(angle-0.04)*700;
+	if(angle/4!=0.0)nowyspeed = -1*(angle-0.74)*700;
 
-	silniki.setSpeed(nowyspeed,nowyspeed,4); //Set speed for motors;
+	silniki.setSpeed(nowyspeed,nowyspeed,1); //Set speed for motors;
 	angle = 0.0;
 }
+
+char getch(){
+    char buf=0;
+    struct termios old={0};
+    fflush(stdout);
+    if(tcgetattr(0, &old)<0)
+        perror("tcsetattr()");
+    old.c_lflag&=~ICANON;
+    old.c_lflag&=~ECHO;
+    old.c_cc[VMIN]=1;
+    old.c_cc[VTIME]=0;
+    if(tcsetattr(0, TCSANOW, &old)<0)
+        perror("tcsetattr ICANON");
+    if(read(0,&buf,1)<0)
+        perror("read()");
+    old.c_lflag|=ICANON;
+    old.c_lflag|=ECHO;
+    if(tcsetattr(0, TCSADRAIN, &old)<0)
+        perror ("tcsetattr ~ICANON");
+    printf("%c\n",buf);
+    return buf;
+ }
 
 int main(void)
 {
 	//std::thread t(&balancing);
 
 	int state=2; // 0 laying front, 1 laying back, 2 balancing
-	//imu.setup(); // initialize IMU
+	imu.setup(); // initialize IMU
 	usleep(100000);
-	if(!lipol.isGood())printf("niski poziom napiecia baterii");
+	//if(!lipol.isGood())printf("niski poziom napiecia baterii");
 
 
 
-	//if(imu.getRoll()>0.8)state = 1;
-	//else if (imu.getRoll()< -0.8)state = 0;
-	//else state = 2;
-	//imu.resetFIFO();
+	if(imu.getRoll()>0.8)state = 1;
+	else if (imu.getRoll()< -0.8)state = 0;
+	else state = 2;
+	imu.resetFIFO();
 
+	char c;
+	float speedl=0.0;
+	float speedr=0.0;
 
 	while(1){
 		//imu.resetFIFO();
 
-		switch (state){
-		case 0:
-			silniki.setSpeed(950,950,1);
-			usleep(100000);
-			usleep(100000);
-			usleep(100000);
-			usleep(100000);
+		printf("ADC5: %d\n",lipol.getRaw());
 
-			silniki.setSpeed(-950,-950,1);
-			usleep(100000);
-			usleep(100000);
-			usleep(100000);
-			usleep(100000);
-			usleep(35000);
-			state = 2;
+		switch (c){
+		case 'w':
+			if(speedl>0||speedr>0)speedl=speedr=20.0;
+			speedl=speedr-=20.0;
 		break;
-		case 1:
-			silniki.setSpeed(-950,-950,1);
-			usleep(100000);
-			usleep(100000);
-			usleep(100000);
-			usleep(100000);
-
-			silniki.setSpeed(950,950,1);
-			usleep(100000);
-			usleep(100000);
-			usleep(100000);
-			usleep(100000);
-			usleep(35000);
-			state = 2;
+		case 'a':
+			speedr+=5.0;
+			speedl-=5.0;
+		break;
+		case 's':
+			if(speedl<0||speedr<0)speedl=speedr=-20.0;
+			speedl=speedr+=20.0;
 
 		break;
-		case 2:
+		case 'd':
+			speedr-=5.0;
+			speedl+=5.0;
+		break;
+		case 'q':
+			silniki.disable();
+			usleep(10000);
+		break;
+		default:
+
+			usleep(1000);
 			//t.detach();
 			//balancing();
-			silniki.disable();
+			//silniki.setSpeed(100,100,3);
+			//usleep(100000);
+
 			//printf("Message received from PRU:%d\n", hcr.getDistance(distance_sensors::front));
-			printf("ADC5: %d\n",lipol.getRaw());
-			usleep(100000);
+			//printf("ADC5: %d\n",lipol.getRaw());
 		break;
 		}
+		if(speedr>1000)speedr=1000;
+		if(speedl>1000)speedl=1000;
+		if(speedr<-1000)speedr=-1000;
+		if(speedl<-1000)speedl=-1000;
+
+		silniki.setSpeed(speedl,speedr,3);
+		c = getch();
 	}
 
 
