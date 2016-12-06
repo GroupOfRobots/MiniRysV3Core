@@ -43,18 +43,13 @@ float Controller::speedPIControl(float DT, float input, float setPoint,  float K
   return (output);
 }
 
-void Controller::calculate_speed(float actualangle,int actualleftspeed, int actualrightspeed, int steering, int throttle, int &speedleft, int &speedright){
+void Controller::calculate_speed(float actualangle,int actualleftspeed, int actualrightspeed, int steering, int throttle, float &speedleft, float &speedright){
 
   throttle = 10;
 
   steering = 5;
-
-  //timer_value = millis();
   timerStop(); //timer value;
-
-  //dt = (timer_value - timer_old);
-  dt = timerValue();
-  //timer_old = timer_value;
+  dt = timerValue()*1000;
   timerStart();
 
   angle_adjusted_Old = angle_adjusted;

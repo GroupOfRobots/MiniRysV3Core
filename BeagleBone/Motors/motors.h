@@ -35,14 +35,19 @@ private:
 	float userspeedright;
 	float maxmotorspeed;
 	float minmotorspeed;
+	long distance;
 
 public:
 
 	Motors();
 	~Motors();
-	int setSpeed(float,float,int); //speed from -1000 to 1000
+	int setSpeed(float,float,float,int); //speed from -1000 to 1000
 	void enable();
 	void disable();
+	float getDistance();
+	void resetDistance();
+	int getLeftSpeed();
+	int getRightSpeed();
 };
 
 

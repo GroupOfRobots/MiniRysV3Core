@@ -46,8 +46,8 @@ private:
 	float max_target_angle = MAX_TARGET_ANGLE;
 	float control_output;
 
-	int16_t actual_robot_speed;
-	int16_t actual_robot_speed_Old;
+	float actual_robot_speed;
+	float actual_robot_speed_Old;
 	float estimated_speed_filtered;
 
 	float stabilityPDControl(float DT, float input, float setPoint,  float Kp, float Kd);
@@ -55,7 +55,7 @@ private:
 
 
 public:
-	void calculate_speed(float actualangle, int actualleftspeed, int actualrightspeed, int steering, int throttle, int &speedleft, int &speedright);
+	void calculate_speed(float actualangle, int actualleftspeed, int actualrightspeed, int steering, int throttle, float &speedleft, float &speedright);
 	float timerValue();
 	void timerStart();
 	void timerStop();

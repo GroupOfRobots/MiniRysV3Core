@@ -56,6 +56,8 @@ Sonar hcr;
 Controller pid;
 float angle;
 int nowyspeed=0;
+float finalleftspeed;
+float finalrightspeed;
 
 void balancing(){
 
@@ -67,10 +69,14 @@ void balancing(){
 	usleep(1250);
 	angle += imu.getRoll();
 	usleep(1250);
-	if(angle/4!=0.0)nowyspeed = -1*(angle-0.74)*700;
+	angle = angle/4;
 
-	silniki.setSpeed(nowyspeed,nowyspeed,1); //Set speed for motors;
-	angle = 0.0;
+	pid.calculate_speed(angle,silniki.getLeftSpeed(),silniki.getRightSpeed(),0,0,finalleftspeed,finalrightspeed);
+
+	printf("%fl;%fl:%fl\n",finalleftspeed, finalrightspeed, pid.timerValue());
+
+	//silniki.setSpeed(finalleftspeed,finalrightspeed,pid.timerValue(),1); //Set speed for motors dt could be wrong
+
 }
 
 char getch(){
@@ -163,7 +169,7 @@ int main(void)
 		if(speedr<-1000)speedr=-1000;
 		if(speedl<-1000)speedl=-1000;
 
-		silniki.setSpeed(speedl,speedr,3);
+		silniki.setSpeed(speedl,speedr,0.0,3);
 		c = getch();
 	}
 

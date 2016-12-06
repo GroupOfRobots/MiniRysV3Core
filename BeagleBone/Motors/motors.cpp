@@ -3,6 +3,7 @@
 Motors::Motors(){
 	sended = new data_frame;
 	result = 0;
+	distance = 0;
 	userspeedleft=0;
 	userspeedright=0;
 	maxmotorspeed = MAX_MOTOR_SPEED;
@@ -27,7 +28,7 @@ Motors::~Motors(){
 	this->disable();
 }
 
-int Motors::setSpeed(float leftspeed, float rightspeed,int microstep){
+int Motors::setSpeed(float leftspeed, float rightspeed,float dt, int microstep){
 
 	struct pollfd pollfds[1];
 
@@ -65,31 +66,33 @@ int Motors::setSpeed(float leftspeed, float rightspeed,int microstep){
 		}
 		else throw 20;
 
+		distance+= (userspeedleft+userspeedright)/2*dt*0.7;
+
 		if(userspeedleft>=0){
 			sended->dirl = 0;
 			if(userspeedleft==0)sended->speedl = 0;
 			else{
-				userspeedleft = 1/userspeedleft;
-				sended->speedl = (int)minmotorspeed*userspeedleft;
+				//userspeedleft = 1/userspeedleft;
+				sended->speedl = (int)minmotorspeed*(1/userspeedleft);
 			}
 		}
 		else{
 			sended->dirl = 1;
-			userspeedleft = -1/userspeedleft;
-			sended->speedl = (int)minmotorspeed*userspeedleft;
+			//userspeedleft = -1/userspeedleft;
+			sended->speedl = (int)minmotorspeed*(1/userspeedleft);
 		}
 		if(rightspeed>=0){
 			sended->dirr = 0;
 			if(userspeedright==0)sended->speedr = 0;
 			else {
-				userspeedright = 1/userspeedright;
-				sended->speedr = (int)minmotorspeed*userspeedright;
+				//userspeedright = 1/userspeedright;
+				sended->speedr = (int)minmotorspeed*(1/userspeedright);
 			}
 		}
 		else{
 			sended->dirr = 1;
-			userspeedright = -1/userspeedright;
-			sended->speedr = (int)minmotorspeed*userspeedright;
+			//userspeedright = -1/userspeedright;
+			sended->speedr = (int)minmotorspeed*(1/userspeedright);
 		}
 
 		if(sended->speedl!=0&&sended->speedl<maxmotorspeed)sended->speedl = (unsigned int)maxmotorspeed;
@@ -156,4 +159,21 @@ void Motors::disable(){
    fs.open("/sys/class/gpio/gpio79/value",std::ofstream::out);
    fs << "1";
    fs.close();
+}
+
+float Motors::getDistance(){
+
+	return distance;
+}
+
+void Motors::resetDistance(){
+	distance = 0.0;
+}
+
+int Motors::getLeftSpeed(){
+	return (int)userspeedleft;
+}
+
+int Motors::getRightSpeed(){
+	return (int)userspeedright;
 }
