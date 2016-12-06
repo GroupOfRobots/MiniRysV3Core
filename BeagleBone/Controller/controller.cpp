@@ -49,10 +49,13 @@ void Controller::calculate_speed(float actualangle,int actualleftspeed, int actu
 
   steering = 5;
 
-  timer_value = millis();
+  //timer_value = millis();
+  timerStop();
 
-  dt = (timer_value - timer_old);
-  timer_old = timer_value;
+  //dt = (timer_value - timer_old);
+  dt = timerValue();
+  //timer_old = timer_value;
+  timerStart();
 
   angle_adjusted_Old = angle_adjusted;
   angle_adjusted = actualangle;
@@ -85,6 +88,16 @@ void Controller::calculate_speed(float actualangle,int actualleftspeed, int actu
 
 }
 
-long Controller::millis(){
-	return 0;
+void Controller::timerStart(){
+	timer_old = std::chrono::high_resolution_clock::now();
+}
+
+void Controller::timerStop(){
+	timer_value = std::chrono::high_resolution_clock::now();
+}
+
+long Controller::timerValue(){
+	std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(timer_value - timer_old);
+
+	return time_span.count();
 }

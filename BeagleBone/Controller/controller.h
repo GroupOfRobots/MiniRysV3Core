@@ -1,7 +1,10 @@
 #ifndef _CONTROLLER_INCLUDED_
 #define _CONTROLLER_INCLUDED_
 
+#include <ctime>
+#include <ratio>
 #include <chrono>
+
 
 #define MAX_THROTTLE 580
 #define MAX_STEERING 150
@@ -20,8 +23,8 @@
 
 class Controller{
 private:
-	long timer_old;
-	long timer_value;
+	std::chrono::high_resolution_clock::time_point timer_old;
+	std::chrono::high_resolution_clock::time_point timer_value;
 	float dt;
 
 	float angle_adjusted;
@@ -53,7 +56,9 @@ private:
 
 public:
 	void calculate_speed(float actualangle, int actualleftspeed, int actualrightspeed, int steering, int throttle, int &speedleft, int &speedright);
-	long millis(); //to do using chrono
+	long timerValue();
+	void timerStart();
+	void timerStop();
 };
 
 #endif
