@@ -4,21 +4,22 @@
 #include <ctime>
 #include <ratio>
 #include <chrono>
+#include <cstdio>
 
 
 #define MAX_THROTTLE 580
 #define MAX_STEERING 150
 #define MAX_TARGET_ANGLE 12
 
-#define KP 0.19
-#define KD 28
-#define KP_THROTTLE 0.07
-#define KI_THROTTLE 0.04
+#define KP 0.8
+#define KD 70
+#define KP_THROTTLE 0.05
+#define KI_THROTTLE 0.00
 
 #define ITERM_MAX_ERROR 25
 #define ITERM_MAX 8000
 
-#define MAX_CONTROL_OUTPUT 500
+#define MAX_CONTROL_OUTPUT 900
 
 
 class Controller{

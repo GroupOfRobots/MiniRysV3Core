@@ -62,21 +62,21 @@ float finalrightspeed;
 void balancing(){
 
 	angle += imu.getRoll();
-	usleep(1250);
+	usleep(50);
 	angle += imu.getRoll();
-	usleep(1250);
+	usleep(50);
 	angle += imu.getRoll();
-	usleep(1250);
+	usleep(50);
 	angle += imu.getRoll();
-	usleep(1250);
-	angle = angle/4;
+	usleep(50);
+	angle = angle/4*180/3.1415;
 
 	pid.calculate_speed(angle,silniki.getLeftSpeed(),silniki.getRightSpeed(),0,0,finalleftspeed,finalrightspeed);
 
-	printf("%fl;%fl:%fl\n",finalleftspeed, finalrightspeed, pid.timerValue());
+	printf("%f\n", angle);
 
-	//silniki.setSpeed(finalleftspeed,finalrightspeed,pid.timerValue(),1); //Set speed for motors dt could be wrong
-
+	silniki.setSpeed(finalleftspeed,finalrightspeed,0.0,4);
+	angle = 0.0;
 }
 
 char getch(){
@@ -105,30 +105,29 @@ int main(void)
 {
 	//std::thread t(&balancing);
 
-	int state=2; // 0 laying front, 1 laying back, 2 balancing
+	//int state=2; // 0 laying front, 1 laying back, 2 balancing
 	imu.setup(); // initialize IMU
 	usleep(100000);
 	//if(!lipol.isGood())printf("niski poziom napiecia baterii");
 
 
 
-	if(imu.getRoll()>0.8)state = 1;
-	else if (imu.getRoll()< -0.8)state = 0;
-	else state = 2;
+	//if(imu.getRoll()>0.8)state = 1;
+	//else if (imu.getRoll()< -0.8)state = 0;
+	//else state = 2;
 	imu.resetFIFO();
 
 	char c;
-	float speedl=0.0;
-	float speedr=0.0;
+	//float speedl=0.0;
+	//float speedr=0.0;
 	pid.timerStart();
 
 	while(1){
+
+		balancing();
 		//imu.resetFIFO();
 
-		printf("ADC5: %d\n",lipol.getRaw());
-		pid.timerStop();
-		printf("%f\n",pid.timerValue());
-		pid.timerStart();
+		/*printf("ADC5: %d\n",lipol.getRaw());
 
 		switch (c){
 		case 'w':
@@ -170,7 +169,7 @@ int main(void)
 		if(speedl<-1000)speedl=-1000;
 
 		silniki.setSpeed(speedl,speedr,0.0,3);
-		c = getch();
+		c = getch();*/
 	}
 
 

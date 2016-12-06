@@ -79,7 +79,7 @@ int Motors::setSpeed(float leftspeed, float rightspeed,float dt, int microstep){
 		else{
 			sended->dirl = 1;
 			//userspeedleft = -1/userspeedleft;
-			sended->speedl = (int)minmotorspeed*(1/userspeedleft);
+			sended->speedl = (int)minmotorspeed*(-1/userspeedleft);
 		}
 		if(rightspeed>=0){
 			sended->dirr = 0;
@@ -92,7 +92,7 @@ int Motors::setSpeed(float leftspeed, float rightspeed,float dt, int microstep){
 		else{
 			sended->dirr = 1;
 			//userspeedright = -1/userspeedright;
-			sended->speedr = (int)minmotorspeed*(1/userspeedright);
+			sended->speedr = (int)minmotorspeed*(-1/userspeedright);
 		}
 
 		if(sended->speedl!=0&&sended->speedl<maxmotorspeed)sended->speedl = (unsigned int)maxmotorspeed;
@@ -100,42 +100,19 @@ int Motors::setSpeed(float leftspeed, float rightspeed,float dt, int microstep){
 
 		sended->mstep = microstep;
 
-		printf("r%d,l%d\n",sended->speedr,sended->speedl);
-
 		/* Open the rpmsg_pru character device file */
 		pollfds[0].fd = open(DEVICE_NAME, O_RDWR);
 
-		/*
-		 * If the RPMsg channel doesn't exist yet the character device
-		 * won't either.
-		 * Make sure the PRU firmware is loaded and that the rpmsg_pru
-		 * module is inserted.
-		 */
 		if (pollfds[0].fd < 0) {
 			printf("Failed to open %s\n", DEVICE_NAME);
 			return -1;
 		}
 
-		/* The RPMsg channel exists and the character device is opened */
-		//printf("Opened %s, sending %d messages\n\n", DEVICE_NAME, 1);
-
 		result = 0;
 
-		/* Send data structure to the PRU through the RPMsg channel */
 		result = write(pollfds[0].fd, sended, 13);
-		if (result > 0)
-			//printf("Message %d: Sent to PRU\n", 1);
 
-		//result = read(pollfds[0].fd, readBuf, MAX_BUFFER_SIZE);
-		//if (result > 0)
-		//	printf("Message %d received from PRU:%s\n\n", 1, readBuf);
-
-		/* Received all the messages the example is complete */
-		//printf("Received %d messages, closing %s\n", 1, DEVICE_NAME);
-
-		/* Close the rpmsg_pru character device file */
 		close(pollfds[0].fd);
-
 	}
 
 	return 0;
