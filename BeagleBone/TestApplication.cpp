@@ -53,7 +53,7 @@ Motors silniki;
 Battery lipol;
 Imu imu;
 Sonar hcr;
-// Controller pid; add timer to use it
+Controller pid;
 float angle;
 int nowyspeed=0;
 
@@ -114,11 +114,15 @@ int main(void)
 	char c;
 	float speedl=0.0;
 	float speedr=0.0;
+	pid.timerStart();
 
 	while(1){
 		//imu.resetFIFO();
 
 		printf("ADC5: %d\n",lipol.getRaw());
+		pid.timerStop();
+		printf("%f\n",pid.timerValue());
+		pid.timerStart();
 
 		switch (c){
 		case 'w':

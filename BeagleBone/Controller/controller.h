@@ -23,7 +23,7 @@
 
 class Controller{
 private:
-	std::chrono::high_resolution_clock::time_point timer_old;
+	std::chrono::high_resolution_clock::time_point timer_old = std::chrono::high_resolution_clock::now();
 	std::chrono::high_resolution_clock::time_point timer_value;
 	float dt;
 
@@ -56,7 +56,7 @@ private:
 
 public:
 	void calculate_speed(float actualangle, int actualleftspeed, int actualrightspeed, int steering, int throttle, int &speedleft, int &speedright);
-	long timerValue();
+	float timerValue();
 	void timerStart();
 	void timerStop();
 };
