@@ -75,7 +75,7 @@ void balancing(){
 
 	printf("%f\n", angle);
 
-	silniki.setSpeed(finalleftspeed,finalrightspeed,0.0,4);
+	silniki.setSpeed(-finalleftspeed,-finalrightspeed,0.0,4);
 	angle = 0.0;
 }
 
