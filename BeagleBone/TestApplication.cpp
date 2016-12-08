@@ -59,7 +59,7 @@ int nowyspeed=0;
 float finalleftspeed;
 float finalrightspeed;
 
-void balancing(){
+void balancing(int steering, int throttle){
 
 	angle += imu.getRoll();
 	usleep(50);
@@ -70,9 +70,8 @@ void balancing(){
 	angle += imu.getRoll();
 	usleep(50);
 	angle = angle/4*180/3.1415;
-	angle+=3;
 
-	pid.calculate_speed(angle,silniki.getLeftSpeed(),silniki.getRightSpeed(),0,0,finalleftspeed,finalrightspeed);
+	pid.calculate_speed(angle,silniki.getLeftSpeed(),silniki.getRightSpeed(),steering,throttle,finalleftspeed,finalrightspeed);
 
 	silniki.setSpeed(finalleftspeed,finalrightspeed,0.0,4);
 	angle = 0.0;
@@ -104,7 +103,6 @@ int main(void)
 {
 	//std::thread t(&balancing);
 
-	//int state=2; // 0 laying front, 1 laying back, 2 balancing
 	silniki.disable();
 	imu.setup(); // initialize IMU
 	usleep(100000);
@@ -112,43 +110,34 @@ int main(void)
 
 
 	//if(!lipol.isGood())printf("niski poziom napiecia baterii");
-
-
-
-	//if(imu.getRoll()>0.8)state = 1;
-	//else if (imu.getRoll()< -0.8)state = 0;
-	//else state = 2;
 	imu.resetFIFO();
 
-	//char c;
-	//float speedl=0.0;
-	//float speedr=0.0;
+	char c;
+	int gaz=0;
+	int kierownica=0;
 	pid.timerStart();
 
 	while(1){
 
-		balancing();
+		balancing(2,0);
 		//imu.resetFIFO();
 
-		/*printf("ADC5: %d\n",lipol.getRaw());
+		//printf("ADC5: %d\n",lipol.getRaw());
 
-		switch (c){
+		/*switch (c){
 		case 'w':
-			if(speedl>0||speedr>0)speedl=speedr=20.0;
-			speedl=speedr-=20.0;
+			if(gaz<0)gaz = 0;
+			gaz+=1;
 		break;
 		case 'a':
-			speedr+=5.0;
-			speedl-=5.0;
+			kierownica +=1;
 		break;
 		case 's':
-			if(speedl<0||speedr<0)speedl=speedr=-20.0;
-			speedl=speedr+=20.0;
-
+			if(gaz>0)gaz =0;
+			gaz-=1;
 		break;
 		case 'd':
-			speedr-=5.0;
-			speedl+=5.0;
+			kierownica-=1;
 		break;
 		case 'q':
 			silniki.disable();
@@ -166,12 +155,8 @@ int main(void)
 			//printf("ADC5: %d\n",lipol.getRaw());
 		break;
 		}
-		if(speedr>1000)speedr=1000;
-		if(speedl>1000)speedl=1000;
-		if(speedr<-1000)speedr=-1000;
-		if(speedl<-1000)speedl=-1000;
 
-		silniki.setSpeed(speedl,speedr,0.0,3);
+		balancing(kierownica,gaz);
 		c = getch();*/
 	}
 
