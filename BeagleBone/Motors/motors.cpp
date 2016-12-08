@@ -147,10 +147,10 @@ void Motors::resetDistance(){
 	distance = 0.0;
 }
 
-int Motors::getLeftSpeed(){
-	return (int)userspeedleft;
+float Motors::getLeftSpeed(){
+	return userspeedleft;
 }
 
-int Motors::getRightSpeed(){
-	return (int)userspeedright;
+float Motors::getRightSpeed(){
+	return userspeedright;
 }

@@ -25,25 +25,19 @@ float Controller::speedPIControl(float DT, float input, float setPoint,  float K
   float output;
 
   error = setPoint - input;
-  if(error>-ITERM_MAX_ERROR){
-	  PID_errorSum += error;
-	  if(error<ITERM_MAX_ERROR)PID_errorSum += error;
-	  else PID_errorSum += ITERM_MAX_ERROR;
-  }
-  else PID_errorSum -= ITERM_MAX_ERROR;
+  if(error>ITERM_MAX_ERROR)error = ITERM_MAX_ERROR;
+  if(error<-ITERM_MAX_ERROR)error = -ITERM_MAX_ERROR;
 
-  if(PID_errorSum>-ITERM_MAX){
-	  PID_errorSum += PID_errorSum;
-	  if(PID_errorSum<ITERM_MAX)PID_errorSum += error;
-	  else PID_errorSum += ITERM_MAX;
-  }
-  else PID_errorSum -= ITERM_MAX;
+  PID_errorSum += error;
+  if(PID_errorSum>ITERM_MAX)PID_errorSum = ITERM_MAX;
+  if(PID_errorSum<-ITERM_MAX)PID_errorSum = -ITERM_MAX;
+
 
   output = Kp * error + Ki * PID_errorSum * DT * 0.001; // DT is in miliseconds...
   return (output);
 }
 
-void Controller::calculate_speed(float actualangle,int actualleftspeed, int actualrightspeed, int steering, int throttle, float &speedleft, float &speedright){
+void Controller::calculate_speed(float actualangle,float actualleftspeed, float actualrightspeed, int steering, int throttle, float &speedleft, float &speedright){
 
 
   timerStop(); //timer value;
@@ -58,7 +52,7 @@ void Controller::calculate_speed(float actualangle,int actualleftspeed, int actu
   actual_robot_speed = (actualleftspeed + actualrightspeed) / 2; // Positive: forward
 
   float angular_velocity = (angle_adjusted - angle_adjusted_Old) * 90.0; // 90 is an empirical extracted factor to adjust for real units
-  float estimated_speed = actual_robot_speed_Old - angular_velocity;     // We use robot_speed(t-1) to compensate the delay
+  float estimated_speed = -actual_robot_speed_Old - angular_velocity;     // We use robot_speed(t-1) to compensate the delay
   estimated_speed_filtered = estimated_speed_filtered * 0.95 + (float)estimated_speed * 0.05;  // low pass filter on estimated speed
 
     // SPEED CONTROL: This is a PI controller.
@@ -67,13 +61,11 @@ void Controller::calculate_speed(float actualangle,int actualleftspeed, int actu
   if(target_angle>max_target_angle)target_angle = max_target_angle;
   if(target_angle<-max_target_angle)target_angle = -max_target_angle;
 
-  printf("%f\n",estimated_speed_filtered);
-
-
     // Stability control: This is a PD controller.
     //    input: robot target angle(from SPEED CONTROL), variable: robot angle, output: Motor speed
     //    We integrate the output (sumatory), so the output is really the motor acceleration, not motor speed.
-  control_output += stabilityPDControl(dt, angle_adjusted, target_angle, Kp, Kd);
+  printf("%f %f %f \n", target_angle,angle_adjusted, estimated_speed_filtered);
+  control_output = stabilityPDControl(dt, angle_adjusted, target_angle, Kp, Kd);
   if(control_output>MAX_CONTROL_OUTPUT)control_output = MAX_CONTROL_OUTPUT;
   if(control_output<-MAX_CONTROL_OUTPUT)control_output = -MAX_CONTROL_OUTPUT;
 

@@ -46,8 +46,8 @@ public:
 	void disable();
 	float getDistance();
 	void resetDistance();
-	int getLeftSpeed();
-	int getRightSpeed();
+	float getLeftSpeed();
+	float getRightSpeed();
 };
 
 

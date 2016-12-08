@@ -11,13 +11,13 @@
 #define MAX_STEERING 150
 #define MAX_TARGET_ANGLE 12
 
-#define KP 0.8
-#define KD 70
-#define KP_THROTTLE 0.05
-#define KI_THROTTLE 0.00
+#define KP 50
+#define KD 20
+#define KP_THROTTLE 0.4
+#define KI_THROTTLE 0.0
 
-#define ITERM_MAX_ERROR 25
-#define ITERM_MAX 8000
+#define ITERM_MAX_ERROR 50
+#define ITERM_MAX 5000
 
 #define MAX_CONTROL_OUTPUT 900
 
@@ -56,7 +56,7 @@ private:
 
 
 public:
-	void calculate_speed(float actualangle, int actualleftspeed, int actualrightspeed, int steering, int throttle, float &speedleft, float &speedright);
+	void calculate_speed(float actualangle, float actualleftspeed, float actualrightspeed, int steering, int throttle, float &speedleft, float &speedright);
 	float timerValue();
 	void timerStart();
 	void timerStop();

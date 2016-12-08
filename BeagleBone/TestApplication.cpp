@@ -70,12 +70,11 @@ void balancing(){
 	angle += imu.getRoll();
 	usleep(50);
 	angle = angle/4*180/3.1415;
+	angle+=3;
 
 	pid.calculate_speed(angle,silniki.getLeftSpeed(),silniki.getRightSpeed(),0,0,finalleftspeed,finalrightspeed);
 
-	printf("%f\n", angle);
-
-	silniki.setSpeed(-finalleftspeed,-finalrightspeed,0.0,4);
+	silniki.setSpeed(finalleftspeed,finalrightspeed,0.0,4);
 	angle = 0.0;
 }
 
@@ -106,8 +105,12 @@ int main(void)
 	//std::thread t(&balancing);
 
 	//int state=2; // 0 laying front, 1 laying back, 2 balancing
+	silniki.disable();
 	imu.setup(); // initialize IMU
 	usleep(100000);
+	silniki.enable();
+
+
 	//if(!lipol.isGood())printf("niski poziom napiecia baterii");
 
 
@@ -117,7 +120,7 @@ int main(void)
 	//else state = 2;
 	imu.resetFIFO();
 
-	char c;
+	//char c;
 	//float speedl=0.0;
 	//float speedr=0.0;
 	pid.timerStart();
