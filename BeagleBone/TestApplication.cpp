@@ -58,23 +58,26 @@ float angle;
 int nowyspeed=0;
 float finalleftspeed;
 float finalrightspeed;
+int steering;
+int throttle;
 
-void balancing(int steering, int throttle){
+void balancing(){
 
-	angle += imu.getRoll();
-	usleep(50);
-	angle += imu.getRoll();
-	usleep(50);
-	angle += imu.getRoll();
-	usleep(50);
-	angle += imu.getRoll();
-	usleep(50);
-	angle = angle/4*180/3.1415;
 
-	pid.calculate_speed(angle,silniki.getLeftSpeed(),silniki.getRightSpeed(),steering,throttle,finalleftspeed,finalrightspeed);
-
-	silniki.setSpeed(finalleftspeed,finalrightspeed,0.0,4);
-	angle = 0.0;
+	while(1){
+		angle += imu.getRoll();
+		usleep(50);
+		angle += imu.getRoll();
+		usleep(50);
+		angle += imu.getRoll();
+		usleep(50);
+		angle += imu.getRoll();
+		usleep(50);
+		angle = angle/4*180/3.1415;
+		pid.calculate_speed(angle,silniki.getLeftSpeed(),silniki.getRightSpeed(),steering,throttle,finalleftspeed,finalrightspeed);
+		silniki.setSpeed(finalleftspeed,finalrightspeed,0.0,4);
+		angle = 0.0;
+	}
 }
 
 char getch(){
@@ -101,53 +104,52 @@ char getch(){
 
 int main(void)
 {
-	//std::thread t(&balancing);
 
 	silniki.disable();
 	imu.setup(); // initialize IMU
 	usleep(100000);
 	silniki.enable();
 
-
 	//if(!lipol.isGood())printf("niski poziom napiecia baterii");
 	imu.resetFIFO();
 
+
+
+
 	char c;
-	int gaz=0;
-	int kierownica=0;
+	int exit=1;
 	pid.timerStart();
 
-	while(1){
+	std::thread balance(balancing);
 
-		balancing(2,0);
-		//imu.resetFIFO();
+	while(exit){
 
 		//printf("ADC5: %d\n",lipol.getRaw());
 
-		/*switch (c){
+
+		switch (c){
 		case 'w':
-			if(gaz<0)gaz = 0;
-			gaz+=1;
+			if(throttle<0)throttle = 0;
+			throttle+=1;
 		break;
 		case 'a':
-			kierownica +=1;
+			steering +=1;
 		break;
 		case 's':
-			if(gaz>0)gaz =0;
-			gaz-=1;
+			if(throttle>0)throttle =0;
+			throttle-=1;
 		break;
 		case 'd':
-			kierownica-=1;
+			steering-=1;
 		break;
 		case 'q':
 			silniki.disable();
+			exit =0;
 			usleep(10000);
 		break;
 		default:
 
 			usleep(1000);
-			//t.detach();
-			//balancing();
 			//silniki.setSpeed(100,100,3);
 			//usleep(100000);
 
@@ -156,12 +158,10 @@ int main(void)
 		break;
 		}
 
-		balancing(kierownica,gaz);
-		c = getch();*/
+		c = getch();
 	}
 
-
-
+	balance.join();
 	return 0;
 }
 

@@ -34,7 +34,7 @@ float Controller::speedPIControl(float DT, float input, float setPoint,  float K
 
 
   output = Kp * error + Ki * PID_errorSum * DT * 0.001; // DT is in miliseconds...
-  printf("%f %f %f \n", Ki * PID_errorSum * DT * 0.001,Kp*error, output);
+  //printf("%f %f %f \n", Ki * PID_errorSum * DT * 0.001,Kp*error, output);
   return (output);
 }
 
