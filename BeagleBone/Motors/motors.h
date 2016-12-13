@@ -9,10 +9,10 @@
 #include <fstream>
 
 #define MAX_BUFFER_SIZE		512
-#define MAX_ACCELERATION	2000
-#define MAX_MOTOR_SPEED		4000
+#define MAX_ACCELERATION	300
+#define MAX_MOTOR_SPEED		3000
 #define MIN_MOTOR_SPEED		4000000
-#define MAX_USER_SPEED		800
+#define MAX_USER_SPEED		700
 #define MIN_USER_SPEED		0
 #define DEVICE_NAME		"/dev/rpmsg_pru31"
 

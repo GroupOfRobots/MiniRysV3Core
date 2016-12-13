@@ -120,7 +120,7 @@ int main(void)
 	int exit=1;
 	pid.timerStart();
 
-	std::thread balance(balancing);
+	//std::thread balance(balancing);
 
 	while(exit){
 
@@ -130,7 +130,7 @@ int main(void)
 		switch (c){
 		case 'w':
 			if(throttle<0)throttle = 0;
-			throttle+=1;
+			throttle+=5;
 		break;
 		case 'a':
 			steering +=1;
@@ -147,6 +147,10 @@ int main(void)
 			exit =0;
 			usleep(10000);
 		break;
+		case 'r':
+			steering=0;
+			throttle=0;
+		break;
 		default:
 
 			usleep(1000);
@@ -158,10 +162,12 @@ int main(void)
 		break;
 		}
 
+		silniki.setSpeed(throttle,throttle,0.0,1);
+
 		c = getch();
 	}
 
-	balance.join();
+	//balance.detach();
 	return 0;
 }
 

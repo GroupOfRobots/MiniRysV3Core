@@ -9,12 +9,12 @@
 
 #define MAX_THROTTLE 580
 #define MAX_STEERING 150
-#define MAX_TARGET_ANGLE 12
+#define MAX_TARGET_ANGLE 14
 
-#define KP 60
-#define KD 25
-#define KP_THROTTLE 0.01
-#define KI_THROTTLE 0.15 //zrób coś z tym
+#define KP 50
+#define KD 23
+#define KP_THROTTLE 0.009
+#define KI_THROTTLE 0.1
 
 #define ITERM_MAX_ERROR 500
 #define ITERM_MAX 5000
