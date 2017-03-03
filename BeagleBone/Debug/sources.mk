@@ -25,6 +25,8 @@ CPP_DEPS :=
 SUBDIRS := \
 . \
 Sonar \
+Socket \
+Serial \
 Motors \
 IMU \
 Controller \

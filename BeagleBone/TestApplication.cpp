@@ -40,6 +40,10 @@
 #include <thread>
 #include <unistd.h>
 #include <termios.h>
+#include <assert.h>
+#include <stdio.h>
+#include <string>
+#include <memory>
 
 
 #include "Motors/motors.h" //motors class
@@ -47,6 +51,7 @@
 #include "IMU/imu.h" // angle measurement class
 #include "Controller/controller.h" //angle & speed control
 #include "Sonar/sonar.h" //distance sensors class
+#include "Socket/socket.h" //websocket communication
 
 
 Motors silniki;
@@ -109,6 +114,7 @@ int main(void)
 	imu.setup(); // initialize IMU
 	usleep(100000);
 	silniki.enable();
+	using easywsclient::WebSocket;
 
 	//if(!lipol.isGood())printf("niski poziom napiecia baterii");
 	imu.resetFIFO();
@@ -120,9 +126,23 @@ int main(void)
 	int exit=1;
 	pid.timerStart();
 
+	 std::unique_ptr<WebSocket> ws(WebSocket::from_url("ws://localhost:8126/foo")); //enter valid websocket
+	 assert(ws);
+	 ws->send("goodbye");
+	 ws->send("hello");
+
+	 while (ws->getReadyState() != WebSocket::CLOSED) {
+	         WebSocket::pointer wsp = &*ws; // <-- because a unique_ptr cannot be copied into a lambda
+	         ws->poll();
+	         ws->dispatch([wsp](const std::string & message) {
+	             printf(">>> %s\n", message.c_str());
+	             if (message == "world") { wsp->close(); }
+	         });
+	 }
+
 	//std::thread balance(balancing);
 
-	while(exit){
+	/*while(exit){
 
 		//printf("ADC5: %d\n",lipol.getRaw());
 
@@ -165,7 +185,7 @@ int main(void)
 		silniki.setSpeed(throttle,throttle,0.0,1);
 
 		c = getch();
-	}
+	}*/
 
 	//balance.detach();
 	return 0;

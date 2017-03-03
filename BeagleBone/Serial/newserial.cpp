@@ -1,5 +1,5 @@
-#include <iostream>
-#include "serial.h"
+/*#include <iostream>
+#include "newserial.h"
 #include "newserial.h"
 
 using namespace std;
@@ -270,11 +270,9 @@ Status SerialPort::connect(){ //functions from rs232.c
 	                break;
 	    }
 
-	/*
-	http://pubs.opengroup.org/onlinepubs/7908799/xsh/termios.h.html
 
-	http://man7.org/linux/man-pages/man3/termios.3.html
-	*/
+
+
 
 	    Cport[comport_number] = open(comports[comport_number], O_RDWR | O_NOCTTY | O_NDELAY);
 	    if(Cport[comport_number]==-1){
@@ -283,7 +281,7 @@ Status SerialPort::connect(){ //functions from rs232.c
 	        return(1);
 	    }
 
-	    /* lock access so that another process can't also use the port */
+
 	    if(flock(Cport[comport_number], LOCK_EX | LOCK_NB) != 0){
 
 	        close(Cport[comport_number]);
@@ -299,14 +297,13 @@ Status SerialPort::connect(){ //functions from rs232.c
 	        return(1);
 	    }
 
-	    memset(&new_port_settings, 0, sizeof(new_port_settings));  /* clear the new struct */
 
 	    new_port_settings.c_cflag = cbits | cpar | bstop | CLOCAL | CREAD;
 	    new_port_settings.c_iflag = ipar;
 	    new_port_settings.c_oflag = 0;
 	    new_port_settings.c_lflag = 0;
-	    new_port_settings.c_cc[VMIN] = 0;      /* block untill n bytes are received */
-	    new_port_settings.c_cc[VTIME] = 0;     /* block untill a timer expires (n * 100 mSec.) */
+	    new_port_settings.c_cc[VMIN] = 0;
+	    new_port_settings.c_cc[VTIME] = 0;
 
 	    cfsetispeed(&new_port_settings, baudr);
 	    cfsetospeed(&new_port_settings, baudr);
@@ -327,8 +324,8 @@ Status SerialPort::connect(){ //functions from rs232.c
 
 	    if(flowcontrol){
 
-	        status |= TIOCM_DTR;    /* turn on DTR */
-	        status |= TIOCM_RTS;    /* turn on RTS */
+	        status |= TIOCM_DTR;
+	        status |= TIOCM_RTS;
 	    }
 
 	    if(ioctl(Cport[comport_number], TIOCMSET, &status) == -1){
@@ -351,8 +348,8 @@ Status SerialPort::disconnect(){
 	        perror("unable to get portstatus");
 	    }
 
-	    status &= ~TIOCM_DTR;    /* turn off DTR */
-	    status &= ~TIOCM_RTS;    /* turn off RTS */
+	    status &= ~TIOCM_DTR;
+	    status &= ~TIOCM_RTS;
 
 	    if(ioctl(Cport[comport_number], TIOCMSET, &status) == -1){
 
@@ -362,7 +359,7 @@ Status SerialPort::disconnect(){
 	    tcsetattr(Cport[comport_number], TCSANOW, old_port_settings + comport_number);
 	    close(Cport[comport_number]);
 
-	    flock(Cport[comport_number], LOCK_UN); /* free the port so that others can use it. */
+	    flock(Cport[comport_number], LOCK_UN);
 }
 
 int SerialPort::receive(unsigned char * buffer){
@@ -388,4 +385,5 @@ void SerialPort::flush(){
 
     tcflush(Cport[comport_number], TCIOFLUSH);
 }
+*/
 
