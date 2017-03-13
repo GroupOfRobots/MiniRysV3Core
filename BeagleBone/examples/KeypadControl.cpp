@@ -46,44 +46,16 @@
 #include <memory>
 
 
-#include "Motors/motors.h" //motors class
-#include "Battery/battery.h" //Battery measurement class
-#include "IMU/imu.h" // angle measurement class
-#include "Controller/controller.h" //angle & speed control
-#include "Sonar/sonar.h" //distance sensors class
-#include "Socket/socket.h" //websocket communication
+#include "../Motors/motors.h" //motors class
+#include "../Battery/battery.h" //Battery measurement class
+#include "../Sonar/sonar.h" //distance sensors class
 
 
 Motors silniki;
 Battery lipol;
-Imu imu;
 Sonar hcr;
-Controller pid;
-float angle;
-int nowyspeed=0;
-float finalleftspeed;
-float finalrightspeed;
-int steering;
-int throttle;
-
-void balancing(){
-
-
-	while(1){
-		angle += imu.getRoll();
-		usleep(50);
-		angle += imu.getRoll();
-		usleep(50);
-		angle += imu.getRoll();
-		usleep(50);
-		angle += imu.getRoll();
-		usleep(50);
-		angle = angle/4*180/3.1415;
-		pid.calculate_speed(angle,silniki.getLeftSpeed(),silniki.getRightSpeed(),steering,throttle,finalleftspeed,finalrightspeed);
-		silniki.setSpeed(finalleftspeed,finalrightspeed,0.0,4);
-		angle = 0.0;
-	}
-}
+int speedleft;
+int speedright;
 
 char getch(){
     char buf=0;
@@ -111,43 +83,36 @@ int main(void)
 {
 
 	silniki.disable();
-	imu.setup(); // initialize IMU
-	usleep(100000);
-	silniki.enable();
 
-
-	//if(!lipol.isGood())printf("niski poziom napiecia baterii");
-	imu.resetFIFO();
-
-
-
+	if(!lipol.isGood())printf("niski poziom napiecia baterii");
 
 	char c;
 	int exit=1;
-	pid.timerStart();
-
-
-	std::thread balance(balancing);
 
 	while(exit){
-
-		//printf("ADC5: %d\n",lipol.getRaw());
-
+		
+		
 
 		switch (c){
 		case 'w':
-			if(throttle<0)throttle = 0;
-			throttle+=5;
+			if(speedleft<0)speedleft = 0;
+			speedleft+=5;
+			if(speedright<0)speedright = 0;
+			speedright+=5;
 		break;
 		case 'a':
-			steering +=1;
+			speedleft+=1;
+			speedright-=1;
 		break;
 		case 's':
-			if(throttle>0)throttle =0;
-			throttle-=1;
+			if(speedleft<0)speedleft = 0;
+			speedleft-=5;
+			if(speedright<0)speedright = 0;
+			speedright-=5;
 		break;
 		case 'd':
-			steering-=1;
+			speedleft-=1;
+			speedright+=1;
 		break;
 		case 'q':
 			silniki.disable();
@@ -155,26 +120,16 @@ int main(void)
 			usleep(10000);
 		break;
 		case 'r':
-			steering=0;
-			throttle=0;
-		break;
-		default:
-
-			usleep(1000);
-			//silniki.setSpeed(100,100,3);
-			//usleep(100000);
-
-			//printf("Message received from PRU:%d\n", hcr.getDistance(distance_sensors::front));
-			//printf("ADC5: %d\n",lipol.getRaw());
+			speedleft=0;
+			speedright=0;
+			silniki.disable();
 		break;
 		}
 
-		silniki.setSpeed(throttle,throttle,0.0,1);
+		silniki.setSpeed(speedleft,speedright,0.0,1);
 
 		c = getch();
+		silniki.enable();
 	}
-
-	balance.detach();
 	return 0;
-}
-*/
+}*/

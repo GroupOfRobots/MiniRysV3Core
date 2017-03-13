@@ -8,6 +8,7 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include examples/subdir.mk
 -include Sonar/subdir.mk
 -include Socket/subdir.mk
 -include Serial/subdir.mk
