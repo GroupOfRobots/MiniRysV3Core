@@ -29,7 +29,7 @@ Battery lipol;
 Imu imu;
 Controller pid;
 float angle;
-float actualangle;
+int balancingactive;
 int nowyspeed=0;
 float finalleftspeed;
 float finalrightspeed;
@@ -39,9 +39,8 @@ int throttle;
  enum Position{
 	 layfront = 0,
 	 layback = 1,
-	 standing = 2,
-	 check = 3
- };
+	 standing = 2
+ }actual;
 
 
 void balancing(){ //thread balancing function
@@ -55,9 +54,20 @@ void balancing(){ //thread balancing function
 		usleep(50);
 		angle += imu.getRoll();
 		usleep(50);
-		angle = actualangle =angle/4*180/3.1415;
+		angle =angle/4*180/3.1415;
 		pid.calculate_speed(angle,silniki.getLeftSpeed(),silniki.getRightSpeed(),steering,throttle,finalleftspeed,finalrightspeed);
-		silniki.setSpeed(finalleftspeed,finalrightspeed,0.0,4);
+		if(balancingactive)silniki.setSpeed(finalleftspeed,finalrightspeed,0.0,4);
+
+		if(angle>40.0){
+			actual = Position::layfront;
+			balancingactive = 0;
+		}
+		else if (angle<-40.0){
+			actual = Position::layfront;
+			balancingactive = 0;
+		}
+		else actual = Position::standing;
+
 		angle = 0.0;
 	}
 }
@@ -73,56 +83,55 @@ int main(void)
 	imu.resetFIFO();
 	pid.timerStart(); //start pid timer
 
-	//std::thread balance(balancing);
-	//balance.detach();
-
-	Position actual;
-
+	std::thread balance(balancing); //create balancing thread
 
 	while(1){
 
 		switch (actual){
-		case check:
-			imu.resetFIFO();
-			actualangle = imu.getRoll();
-			actualangle =actualangle*180/3.1415;
-			std::cout<<"my angle: "<<actualangle<<std::endl;
-			if(actualangle>40.0)actual = Position::layfront;
-			else if (actualangle<-40.0)actual = Position::layfront;
-			else actual = Position::standing;
-		break;
 		case standing:
-			//balance.join();
-			std::cout<<"I'm standing"<<std::endl;
-			usleep(2000000);
-			actual = Position::check;
+			balancingactive  =1;
+			usleep(200000);
 		break;
 		case layfront:
 			std::cout<<"I'm trying to stand front"<<std::endl;
-			//balance.detach();
-			usleep(5000000);
-			silniki.setSpeed(-800.0,-800.0,0.0,1);
+			silniki.setSpeed(0.0,0.0,0.0,1);
 			usleep(500000);
-			silniki.setSpeed(800.0,800.0,0.0,1);
+			usleep(500000);
+			usleep(500000);
+			usleep(500000);
+			usleep(500000);
+			usleep(500000);
+			usleep(500000);
+			usleep(500000);
+			silniki.setSpeed(750.0,750.0,0.0,1);
+			usleep(500000);
+			silniki.setSpeed(-700.0,-700.0,0.0,1);
 			usleep(100000);
-			//balance.join();
-			actual = Position::check;
+			actual = Position::standing;
+			std::cout<<"I'm standing"<<std::endl;
 		break;
 		case layback:
 			std::cout<<"I'm trying to stand back"<<std::endl;
-			//balance.detach();
-			usleep(5000000);
-			silniki.setSpeed(800.0,800.0,0.0,1);
+			silniki.setSpeed(0.0,0.0,0.0,1);
 			usleep(500000);
-			silniki.setSpeed(-800.0,-800.0,0.0,1);
+			usleep(500000);
+			usleep(500000);
+			usleep(500000);
+			usleep(500000);
+			usleep(500000);
+			usleep(500000);
+			usleep(500000);
+			silniki.setSpeed(-750.0,-750.0,0.0,1);
+			usleep(500000);
+			silniki.setSpeed(700.0,700.0,0.0,1);
 			usleep(100000);
-			//balance.join();
-			actual = Position::check;
+			actual = Position::standing;
+			std::cout<<"I'm standing"<<std::endl;
 		break;
 		}
 	}
 
-	//balance.detach();
+	balance.detach();
 	return 0;
 }
 
