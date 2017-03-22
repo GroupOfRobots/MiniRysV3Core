@@ -40,8 +40,9 @@ int throttle;
 	 layfront = 0,
 	 layback = 1,
 	 standing = 2
- }actual;
+ };
 
+volatile Position actual;
 
 void balancing(){ //thread balancing function
 
@@ -58,15 +59,18 @@ void balancing(){ //thread balancing function
 		pid.calculate_speed(angle,silniki.getLeftSpeed(),silniki.getRightSpeed(),steering,throttle,finalleftspeed,finalrightspeed);
 		if(balancingactive)silniki.setSpeed(finalleftspeed,finalrightspeed,0.0,4);
 
+		//printf("%f\n",angle);
 		if(angle>40.0){
 			actual = Position::layfront;
 			balancingactive = 0;
+
 		}
 		else if (angle<-40.0){
-			actual = Position::layfront;
+			actual = Position::layback;
 			balancingactive = 0;
 		}
 		else actual = Position::standing;
+
 
 		angle = 0.0;
 	}
@@ -84,7 +88,8 @@ int main(void)
 	pid.timerStart(); //start pid timer
 
 	std::thread balance(balancing); //create balancing thread
-
+	usleep(500000);
+	usleep(500000);
 	while(1){
 
 		switch (actual){
@@ -95,6 +100,7 @@ int main(void)
 		case layfront:
 			std::cout<<"I'm trying to stand front"<<std::endl;
 			silniki.setSpeed(0.0,0.0,0.0,1);
+			silniki.disable();
 			usleep(500000);
 			usleep(500000);
 			usleep(500000);
@@ -103,16 +109,21 @@ int main(void)
 			usleep(500000);
 			usleep(500000);
 			usleep(500000);
-			silniki.setSpeed(750.0,750.0,0.0,1);
+			usleep(500000);
+			usleep(500000);
+			silniki.enable();
+			silniki.setSpeed(700.0,700.0,0.0,1);
+			usleep(500000);
 			usleep(500000);
 			silniki.setSpeed(-700.0,-700.0,0.0,1);
-			usleep(100000);
+			usleep(500000);
 			actual = Position::standing;
 			std::cout<<"I'm standing"<<std::endl;
 		break;
 		case layback:
 			std::cout<<"I'm trying to stand back"<<std::endl;
 			silniki.setSpeed(0.0,0.0,0.0,1);
+			silniki.disable();
 			usleep(500000);
 			usleep(500000);
 			usleep(500000);
@@ -121,10 +132,14 @@ int main(void)
 			usleep(500000);
 			usleep(500000);
 			usleep(500000);
-			silniki.setSpeed(-750.0,-750.0,0.0,1);
+			usleep(500000);
+			usleep(500000);
+			silniki.enable();
+			silniki.setSpeed(-700.0,-700.0,0.0,1);
+			usleep(500000);
 			usleep(500000);
 			silniki.setSpeed(700.0,700.0,0.0,1);
-			usleep(100000);
+			usleep(500000);
 			actual = Position::standing;
 			std::cout<<"I'm standing"<<std::endl;
 		break;

@@ -1,4 +1,4 @@
-#include "socket.h"
+/*#include "socket.h"
 #include <QtCore/QDebug>
 
 QT_USE_NAMESPACE
@@ -48,4 +48,4 @@ bool irys::Communication::isNewRobotStatusToGet() const {
 
 irys::RobotStatus irys::Communication::getReceivedRobotStatus() {
     return receivedRobotStatuses.dequeue();
-}
+}*/

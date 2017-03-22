@@ -1,4 +1,4 @@
-#ifndef SOCKET_H
+/*#ifndef SOCKET_H
 #define SOCKET_H
 
 #include <QtCore/QObject>
@@ -36,4 +36,4 @@ private:
 
 } // namespace irys
 
-#endif // SOCKET_H
+#endif // SOCKET_H*/
