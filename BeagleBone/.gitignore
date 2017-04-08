@@ -1,1 +1,5 @@
-/Debug/
+Debug
+.project
+.cproject
+.settings
+*.sublime-*
