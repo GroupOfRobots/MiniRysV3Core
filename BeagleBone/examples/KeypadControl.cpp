@@ -16,7 +16,7 @@ Keypad controll example
 #include <memory>
 
 
-#include "../Motors/motors.h" //motors class
+#include "../Motors/Motors.h" //motors class
 #include "../Battery/battery.h" //Battery measurement class
 #include "../Sonar/sonar.h" //distance sensors class
 
@@ -60,8 +60,8 @@ int main(void)
 	int exit=1;
 
 	while(exit){
-		
-		
+
+
 		switch (c){
 		case 'w':
 			if(speedleft<0)speedleft = 0;
