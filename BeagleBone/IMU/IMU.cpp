@@ -1,4 +1,5 @@
 #include "IMU.h"
+#include <string>
 
 IMU::IMU() {
 	this->mpu = new MPU6050();
@@ -54,41 +55,47 @@ void IMU::initialize() {
 
 void IMU::readData() {
 	// if programming failed, don't try to do anything
-	if (!dmpReady) return;
-	// get current FIFO count
+	if (!dmpReady) {
+		return;
+	}
+
+	// Get current FIFO length
 	fifoCount = this->mpu->getFIFOCount();
 
+	// Check for FIFO overflow
 	if (fifoCount == 1024) {
 		// reset so we can continue cleanly
 		this->mpu->resetFIFO();
 		// printf("FIFO overflow!\n");
-	} else if (fifoCount >= 42) {
-		// otherwise, check for DMP data ready interrupt (this should happen frequently)
+		return;
+	}
 
-		// read a packet from FIFO
+	// Check for DMP data ready interrupt (this should happen frequently)
+	if (fifoCount >= 42) {
+		// Read a packet from FIFO to buffer
 		this->mpu->getFIFOBytes(fifoBuffer, packetSize);
+		// Parse data from FIFO to gravity and pitch/yaw/roll readings
 		this->mpu->dmpGetQuaternion(quaternion, fifoBuffer);
 		this->mpu->dmpGetGravity(gravity, quaternion);
 		this->mpu->dmpGetYawPitchRoll(yawPitchRoll, quaternion, gravity);
-		//printf("r %7.2f \n", yawPitchRoll[2]);
 	}
 }
 
-float IMU::getPitch(){
+float IMU::getPitch() {
 	readData();
 	return yawPitchRoll[1];
 }
 
-float IMU::getRoll(){
+float IMU::getRoll() {
 	readData();
 	return yawPitchRoll[2];
 }
 
-float IMU::getYaw(){
+float IMU::getYaw() {
 	readData();
 	return yawPitchRoll[0];
 }
 
-void IMU::resetFIFO(){
+void IMU::resetFIFO() {
 	this->mpu->resetFIFO();
 }

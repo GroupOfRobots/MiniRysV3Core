@@ -1,156 +1,198 @@
 #include "Motors.h"
 
-Motors::Motors(){
-	sended = new data_frame;
-	result = 0;
-	distance = 0;
-	userspeedleft=0;
-	userspeedright=0;
-	maxmotorspeed = MAX_MOTOR_SPEED;
-	minmotorspeed = MIN_MOTOR_SPEED;
-	fs.open("/sys/class/gpio/export",std::ofstream::out);
-	if(fs.fail())throw 5;
-	fs << "78";
-	fs.close();
-	fs.open("/sys/class/gpio/gpio78/direction",std::ofstream::out);
-	fs << "out";
-	fs.close();
-	fs.open("/sys/class/gpio/export",std::ofstream::out);
-	fs << "79";
-	fs.close();
-	fs.open("/sys/class/gpio/gpio79/direction",std::ofstream::out);
-	fs << "out";
-	fs.close();
+Motors::Motors() {
+	this->distance = 0;
+	this->speedLeft = 0;
+	this->speedRight = 0;
+	this->microstep = 0;
+	this->maxMotorSpeed = MAX_MOTOR_SPEED;
+	this->minMotorSpeed = MIN_MOTOR_SPEED;
 }
 
-Motors::~Motors(){
-	delete sended;
+Motors::~Motors() {
 	this->disable();
+	this->pruFile.close();
 }
 
-int Motors::setSpeed(float leftspeed, float rightspeed,float dt, int microstep){
+void Motors::initialize() {
+	std::ofstream file;
+	file.open("/sys/class/gpio/export", std::ofstream::out);
+	if (!file.is_open() || !file.good()) {
+		file.close();
+		throw(std::string("Failed opening file: /sys/class/gpio/export"));
+	}
+	file << "78";
+	file << "79";
+	file.close();
 
-	struct pollfd pollfds[1];
+	file.open("/sys/class/gpio/gpio78/direction", std::ofstream::out);
+	if (!file.is_open() || !file.good()) {
+		file.close();
+		throw(std::string("Failed opening file: /sys/class/gpio78/direction"));
+	}
+	file << "out";
+	file.close();
 
-	if(leftspeed!=userspeedleft||rightspeed!=userspeedright||microstep!=sended->mstep){
+	file.open("/sys/class/gpio/gpio79/direction", std::ofstream::out);
+	if (!file.is_open() || !file.good()) {
+		file.close();
+		throw(std::string("Failed opening file: /sys/class/gpio79/direction"));
+	}
+	file << "out";
+	file.close();
 
-		if ((userspeedleft - leftspeed) > MAX_ACCELERATION)
-			userspeedleft -= MAX_ACCELERATION;
-		else if ((userspeedleft - leftspeed) < -MAX_ACCELERATION)
-			userspeedleft += MAX_ACCELERATION;
-		else
-			userspeedleft = leftspeed;
+	this->disable();
 
-		if ((userspeedright - rightspeed) > MAX_ACCELERATION)
-			userspeedright -= MAX_ACCELERATION;
-		else if ((userspeedright - rightspeed) < -MAX_ACCELERATION)
-			userspeedright += MAX_ACCELERATION;
-		else
-			userspeedright = rightspeed;
+	this->pruFile.open(DEVICE_NAME, std::ofstream::out | std::ofstream::binary);
+	if (!this->pruFile.is_open() || !this->pruFile.good()) {
+		this->pruFile.close();
+		throw(std::string("Failed opening file: ") + std::string(DEVICE_NAME));
+	}
+}
 
-		if(microstep==1){
-			maxmotorspeed = MAX_MOTOR_SPEED;
-			minmotorspeed = MIN_MOTOR_SPEED;
-		}
-		else if (microstep==2){
-			maxmotorspeed = MAX_MOTOR_SPEED/2;
-			minmotorspeed = MIN_MOTOR_SPEED/2;
-		}
-		else if (microstep==3){
-			maxmotorspeed = MAX_MOTOR_SPEED/4;
-			minmotorspeed = MIN_MOTOR_SPEED/4;
-		}
-		else if (microstep==4){
-			maxmotorspeed = MAX_MOTOR_SPEED/8;
-			minmotorspeed = MIN_MOTOR_SPEED/8;
-		}
-		else throw 20;
+void Motors::updateOdometry(float dt) {
+	this->distance += (this->speedLeft + this->speedRight) / 2 * dt * 0.7;
+}
 
-		distance+= (userspeedleft+userspeedright)/2*dt*0.7;
-
-		if(userspeedleft>=0){
-			sended->dirl = 0;
-			if(userspeedleft==0)sended->speedl = 0;
-			else{
-				//userspeedleft = 1/userspeedleft;
-				sended->speedl = (int)minmotorspeed*(1/userspeedleft);
-			}
-		}
-		else{
-			sended->dirl = 1;
-			//userspeedleft = -1/userspeedleft;
-			sended->speedl = (int)minmotorspeed*(-1/userspeedleft);
-		}
-		if(rightspeed>=0){
-			sended->dirr = 0;
-			if(userspeedright==0)sended->speedr = 0;
-			else {
-				//userspeedright = 1/userspeedright;
-				sended->speedr = (int)minmotorspeed*(1/userspeedright);
-			}
-		}
-		else{
-			sended->dirr = 1;
-			//userspeedright = -1/userspeedright;
-			sended->speedr = (int)minmotorspeed*(-1/userspeedright);
-		}
-
-		if(sended->speedl!=0&&sended->speedl<maxmotorspeed)sended->speedl = (unsigned int)maxmotorspeed;
-		if(sended->speedr!=0&&sended->speedr<maxmotorspeed)sended->speedr = (unsigned int)maxmotorspeed;
-
-		sended->mstep = microstep;
-
-		/* Open the rpmsg_pru character device file */
-		pollfds[0].fd = open(DEVICE_NAME, O_RDWR);
-
-		if (pollfds[0].fd < 0) {
-			printf("Failed to open %s\n", DEVICE_NAME);
-			return -1;
-		}
-
-		result = 0;
-
-		result = write(pollfds[0].fd, sended, 13);
-
-		close(pollfds[0].fd);
+void Motors::setSpeed(float speedLeft, float speedRight, int microstep) {
+	if (speedLeft == this->speedLeft && speedRight == this->speedRight && microstep == this->microstep) {
+		return;
 	}
 
-	return 0;
+	DataFrame dataFrame;
+
+	// Calculate max speeds for given microstep value
+	if (microstep == 1) {
+		this->maxMotorSpeed = MAX_MOTOR_SPEED;
+		this->minMotorSpeed = MIN_MOTOR_SPEED;
+	} else if (microstep == 2) {
+		this->maxMotorSpeed = MAX_MOTOR_SPEED/2;
+		this->minMotorSpeed = MIN_MOTOR_SPEED/2;
+	} else if (microstep == 3) {
+		this->maxMotorSpeed = MAX_MOTOR_SPEED/4;
+		this->minMotorSpeed = MIN_MOTOR_SPEED/4;
+	} else if (microstep == 4) {
+		this->maxMotorSpeed = MAX_MOTOR_SPEED/8;
+		this->minMotorSpeed = MIN_MOTOR_SPEED/8;
+	} else {
+		throw(std::string("Bad microstep value!"));
+	}
+	this->microstep = microstep;
+	dataFrame.microstep = microstep;
+
+	// Left motor speed
+	// Clip value
+	if (speedLeft != 0 && speedLeft < this->maxMotorSpeed) {
+		speedLeft = (unsigned int)this->maxMotorSpeed;
+	}
+	// Clip acceleration (change of value), set target speed
+	if (speedLeft > (this->speedLeft + MAX_ACCELERATION)) {
+		this->speedLeft = this->speedLeft + MAX_ACCELERATION;
+	} else if (speedLeft < (this->speedLeft - MAX_ACCELERATION)) {
+		this->speedLeft = this->speedLeft - MAX_ACCELERATION;
+	} else {
+		this->speedLeft = speedLeft;
+	}
+	// Calculate and write speed to data frame
+	if (this->speedLeft == 0) {
+		dataFrame.speedLeft = 0;
+	} else {
+		dataFrame.speedLeft = (int)this->minMotorSpeed * (1.0/this->speedLeft);
+	}
+	// Write direction to data frame, reverse speed if needed
+	if (this->speedLeft >= 0) {
+		dataFrame.directionLeft = 0;
+	} else {
+		dataFrame.directionLeft = 1;
+		dataFrame.speedLeft = -dataFrame.speedLeft;
+	}
+
+	// Right motor speed
+	// Clip value
+	if (speedRight != 0 && speedRight < this->maxMotorSpeed) {
+		speedRight = (unsigned int)this->maxMotorSpeed;
+	}
+	// Clip acceleration (change of value), set target speed
+	if (speedRight > (this->speedRight + MAX_ACCELERATION)) {
+		this->speedRight = this->speedRight + MAX_ACCELERATION;
+	} else if (speedRight < (this->speedRight - MAX_ACCELERATION)) {
+		this->speedRight = this->speedRight - MAX_ACCELERATION;
+	} else {
+		this->speedRight = speedRight;
+	}
+	// Calculate and write speed to data frame
+	if (this->speedRight == 0) {
+		dataFrame.speedRight = 0;
+	} else {
+		dataFrame.speedRight = (int)this->minMotorSpeed * (1.0/this->speedRight);
+	}
+	// Write direction to data frame, reverse speed if needed
+	if (this->speedRight >= 0) {
+		dataFrame.directionRight = 0;
+	} else {
+		dataFrame.directionRight = 1;
+		dataFrame.speedRight = -dataFrame.speedRight;
+	}
+
+	// Write data frame to file (PRU communication)
+	if (!this->pruFile.is_open() || !this->pruFile.good()) {
+		throw(std::string("Failed writing to file: ") + std::string(DEVICE_NAME));
+	}
+	this->pruFile.write((char*)(&dataFrame), 13);
 }
 
-void Motors::enable(){
+void Motors::enable() {
+	std::ofstream file;
 
-   fs.open("/sys/class/gpio/gpio78/value",std::ofstream::out);
-   fs << "0";
-   fs.close();
-   fs.open("/sys/class/gpio/gpio79/value",std::ofstream::out);
-   fs << "0";
-   fs.close();
+	file.open("/sys/class/gpio/gpio78/value", std::ofstream::out);
+	if (!file.is_open() || !file.good()) {
+		file.close();
+		throw(std::string("Failed opening file: /sys/class/gpio78/value"));
+	}
+	file << "0";
+	file.close();
+
+	file.open("/sys/class/gpio/gpio79/value", std::ofstream::out);
+	if (!file.is_open() || !file.good()) {
+		file.close();
+		throw(std::string("Failed opening file: /sys/class/gpio79/value"));
+	}
+	file << "0";
+	file.close();
 }
 
-void Motors::disable(){
+void Motors::disable() {
+	std::ofstream file;
 
-   fs.open("/sys/class/gpio/gpio78/value",std::ofstream::out);
-   fs << "1";
-   fs.close();
-   fs.open("/sys/class/gpio/gpio79/value",std::ofstream::out);
-   fs << "1";
-   fs.close();
+	file.open("/sys/class/gpio/gpio78/value", std::ofstream::out);
+	if (!file.is_open() || !file.good()) {
+		file.close();
+		throw(std::string("Failed opening file: /sys/class/gpio78/value"));
+	}
+	file << "1";
+	file.close();
+
+	file.open("/sys/class/gpio/gpio79/value", std::ofstream::out);
+	if (!file.is_open() || !file.good()) {
+		file.close();
+		throw(std::string("Failed opening file: /sys/class/gpio79/value"));
+	}
+	file << "1";
+	file.close();
 }
 
-float Motors::getDistance(){
-
+float Motors::getDistance() {
 	return distance;
 }
 
-void Motors::resetDistance(){
+void Motors::resetDistance() {
 	distance = 0.0;
 }
 
-float Motors::getLeftSpeed(){
-	return userspeedleft;
+float Motors::getSpeedLeft() {
+	return this->speedLeft;
 }
 
-float Motors::getRightSpeed(){
-	return userspeedright;
+float Motors::getSpeedRight() {
+	return this->speedRight;
 }
