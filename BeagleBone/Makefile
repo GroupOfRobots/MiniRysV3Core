@@ -3,7 +3,7 @@ CXXFLAGS=-Wall -Wextra
 LFLAGS=-lpthread
 
 OBJS=build/battery.o
-OBJS+= build/controller.o
+OBJS+= build/Controller.o
 # OBJS+= build/newserial.o
 OBJS+= build/MPU6050.o
 OBJS+= build/IMU.o
@@ -20,8 +20,8 @@ build/testApp: $(OBJS)
 build/battery.o: Battery/battery.cpp Battery/battery.h
 	$(CXX) $(CXXFLAGS) -c Battery/battery.cpp -o build/battery.o
 
-build/controller.o: Controller/controller.cpp Controller/controller.h
-	$(CXX) $(CXXFLAGS) -c Controller/controller.cpp -o build/controller.o
+build/Controller.o: Controller/Controller.cpp Controller/Controller.h
+	$(CXX) $(CXXFLAGS) -c Controller/Controller.cpp -o build/Controller.o
 
 # build/newserial.o: newserial.cpp newserial.h
 # 	$(CXX) $(CXXFLAGS) -c newserial.cpp -o build/newserial.o

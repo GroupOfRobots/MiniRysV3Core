@@ -1,12 +1,3 @@
-/*#include <assert.h>
-#include <chrono>
-#include <cstdlib>
-#include <cstring>
-#include <inttypes.h>
-#include <memory>
-#include <termios.h>
-#include <unistd.h>*/
-
 #include <csignal>
 #include <iostream>
 #include <string>
@@ -15,7 +6,7 @@
 #include "../Motors/Motors.h"
 // #include "../Battery/battery.h"
 #include "../IMU/IMU.h"
-#include "../Controller/controller.h"
+#include "../Controller/Controller.h"
 
 enum Position {
 	layfront = 0,
@@ -24,9 +15,9 @@ enum Position {
 };
 
 // Battery lipol;
-Motors silniki;
+Motors motors;
 IMU imu;
-Controller pid;
+Controller controller;
 volatile Position actual;
 volatile int exitFlag = 0;
 
@@ -43,7 +34,7 @@ void balancing() {
 
 	while (!exitFlag) {
 		// Update odometry with given loop time (dt)
-		silniki.updateOdometry(0.0);
+		motors.updateOdometry(0.0);
 
 		// Retrieve 4 IMU readings and calculate average (noise reduction)
 		float angle = 0.0;
@@ -73,10 +64,10 @@ void balancing() {
 			std::cout << "I'm balancing, angle: " << angle << std::endl;
 
 			// Calculate target speeds for motors
-			pid.calculate_speed(angle, silniki.getSpeedLeft(), silniki.getSpeedRight(), steering, throttle, finalLeftSpeed, finalRightSpeed);
+			controller.calculateSpeed(angle, motors.getSpeedLeft(), motors.getSpeedRight(), steering, throttle, finalLeftSpeed, finalRightSpeed);
 			// Set target speeds
 			try {
-				silniki.setSpeed(finalLeftSpeed, finalRightSpeed, 4);
+				motors.setSpeed(finalLeftSpeed, finalRightSpeed, 4);
 			} catch (std::string & error) {
 				std::cout << "Error setting motors speed: " << error << std::endl;
 				// exitFlag = 1;
@@ -90,7 +81,7 @@ int main() {
 	signal(SIGINT, sigintHandler);
 
 	try {
-		silniki.initialize();
+		motors.initialize();
 		imu.initialize();
 	} catch (std::string & error) {
 		std::cout << "Error initializing: " << error << std::endl;
@@ -99,13 +90,16 @@ int main() {
 
 	usleep(100 * 1000);
 
+	controller.setStabilityPID(50, 0, 20);
+	controller.setSpeedPID(0.009, 0.1, 0);
+
 	/*if (!lipol.isGood()) {
 		printf("niski poziom napiecia baterii");
 	}*/
 	try {
-		silniki.enable();
+		motors.enable();
 		imu.resetFIFO();
-		pid.timerStart();
+		controller.restartTimer();
 	} catch (std::string & error) {
 		std::cout << "Error starting up: " << error << std::endl;
 		return 2;
@@ -124,15 +118,15 @@ int main() {
 				std::cout << "I'm trying to stand" << std::endl;
 				int mult = (actual == layfront ? 1 : -1);
 				try {
-					silniki.setSpeed(0.0, 0.0, 1);
-					silniki.disable();
+					motors.setSpeed(0.0, 0.0, 1);
+					motors.disable();
 					// 5s
 					usleep(5000 * 1000);
-					silniki.enable();
-					silniki.setSpeed(mult * 700.0, mult * 700.0, 1);
+					motors.enable();
+					motors.setSpeed(mult * 700.0, mult * 700.0, 1);
 					// 1s
 					usleep(1000 * 1000);
-					silniki.setSpeed(-mult * 700.0, -mult * 700.0, 1);
+					motors.setSpeed(-mult * 700.0, -mult * 700.0, 1);
 					usleep(500 * 1000);
 				} catch (std::string & error) {
 					std::cout << "Error standing up from laying: " << error << std::endl;
@@ -148,8 +142,8 @@ int main() {
 
 	balance.join();
 	try {
-		silniki.setSpeed(0.0, 0.0, 1);
-		silniki.disable();
+		motors.setSpeed(0.0, 0.0, 1);
+		motors.disable();
 	} catch (std::string & error) {
 		std::cout << "Error disabling motors: " << error << std::endl;
 		return 3;
