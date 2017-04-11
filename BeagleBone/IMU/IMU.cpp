@@ -26,8 +26,8 @@ void IMU::initialize() {
 	this->mpu->initialize();
 
 	// verify connection
-	if (this->mpu->testConnection()) {
-		throw(new std::string("MPU6050 connection failed"));
+	if (!this->mpu->testConnection()) {
+		throw(std::string("MPU6050 connection failed"));
 	}
 
 	// load and configure the DMP
@@ -49,7 +49,7 @@ void IMU::initialize() {
 		// 1 = initial memory load failed
 		// 2 = DMP configuration updates failed
 		// (if it's going to break, usually the code will be 1)
-		throw(std::string("DMP Initialization failed (code %d)\n", devStatus));
+		throw(std::string("DMP Initialization failed (code %d)", devStatus));
 	}
 }
 
