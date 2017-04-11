@@ -79,7 +79,7 @@ void balancing() {
 				silniki.setSpeed(finalLeftSpeed, finalRightSpeed, 4);
 			} catch (std::string & error) {
 				std::cout << "Error setting motors speed: " << error << std::endl;
-				exitFlag = 1;
+				// exitFlag = 1;
 				break;
 			}
 		}
@@ -136,7 +136,7 @@ int main() {
 					usleep(500 * 1000);
 				} catch (std::string & error) {
 					std::cout << "Error standing up from laying: " << error << std::endl;
-					exitFlag = 1;
+					// exitFlag = 1;
 					break;
 				}
 				std::cout << "I'm standing(?)" << std::endl;
