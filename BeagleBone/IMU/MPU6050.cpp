@@ -868,7 +868,7 @@ void MPU6050::setMasterClockSpeed(uint8_t speed) {
  * operation, and if it is cleared, then it's a write operation. The remaining
  * bits (6-0) are the 7-bit device address of the slave device.
  *
- * In read mode, the result of the read is placed in the lowest available 
+ * In read mode, the result of the read is placed in the lowest available
  * EXT_SENS_DATA register. For further information regarding the allocation of
  * read results, please refer to the EXT_SENS_DATA register description
  * (Registers 73 - 96).
@@ -2954,7 +2954,7 @@ void MPU6050::readMemoryBlock(uint8_t *data, uint16_t dataSize, uint8_t bank, ui
 
         // read the chunk of data as specified
         I2Cdev::readBytes(devAddr, MPU6050_RA_MEM_R_W, chunkSize, data + i);
-        
+
         // increase byte index by [chunkSize]
         i += chunkSize;
 
@@ -2988,7 +2988,7 @@ bool MPU6050::writeMemoryBlock(const uint8_t *data, uint16_t dataSize, uint8_t b
 
         // make sure this chunk doesn't go past the bank boundary (256 bytes)
         if (chunkSize > 256 - address) chunkSize = 256 - address;
-        
+
         if (useProgMem) {
             // write the chunk of data as specified
             for (j = 0; j < chunkSize; j++) progBuffer[j] = pgm_read_byte(data + i + j);
@@ -3102,7 +3102,7 @@ bool MPU6050::writeDMPConfigurationSet(const uint8_t *data, uint16_t dataSize, b
             Serial.println(" found...");*/
             if (special == 0x01) {
                 // enable DMP-related interrupts
-                
+
                 //setIntZeroMotionEnabled(true);
                 //setIntFIFOBufferOverflowEnabled(true);
                 //setIntDMPEnabled(true);
@@ -3114,7 +3114,7 @@ bool MPU6050::writeDMPConfigurationSet(const uint8_t *data, uint16_t dataSize, b
                 success = false;
             }
         }
-        
+
         if (!success) {
             if (useProgMem) free(progBuffer);
             return false; // uh oh
@@ -3209,14 +3209,14 @@ uint8_t MPU6050::dmpInitialize() {
     DEBUG_PRINT(MPU6050_DMP_CODE_SIZE);
     DEBUG_PRINTLN(F(" bytes)"));
     if (writeProgMemoryBlock(dmpMemory, MPU6050_DMP_CODE_SIZE)) {
-        printf("Success! DMP code written and verified.\n");
+        // printf("Success! DMP code written and verified.\n");
 
         // write DMP configuration
         DEBUG_PRINT(F("Writing DMP configuration to MPU memory banks ("));
         DEBUG_PRINT(MPU6050_DMP_CONFIG_SIZE);
         DEBUG_PRINTLN(F(" bytes in config def)"));
         if (writeProgDMPConfigurationSet(dmpConfig, MPU6050_DMP_CONFIG_SIZE)) {
-            printf("Success! DMP configuration written and verified.\n");
+            // printf("Success! DMP configuration written and verified.\n");
 
             DEBUG_PRINTLN(F("Setting clock source to Z Gyro..."));
             setClockSource(MPU6050_CLOCK_PLL_ZGYRO);
@@ -3270,7 +3270,7 @@ uint8_t MPU6050::dmpInitialize() {
             uint8_t fifoCount = getFIFOCount();
             uint8_t fifoBuffer[128];
 
-            printf("Current FIFO count=%d\n", fifoCount);
+            // printf("Current FIFO count=%d\n", fifoCount);
             DEBUG_PRINTLN(fifoCount);
             if (fifoCount > 0) getFIFOBytes(fifoBuffer, fifoCount);
 
@@ -3310,10 +3310,10 @@ uint8_t MPU6050::dmpInitialize() {
             for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++) dmpUpdate[j] = pgm_read_byte(&dmpUpdates[pos]);
             writeMemoryBlock(dmpUpdate + 3, dmpUpdate[2], dmpUpdate[0], dmpUpdate[1]);
 
-            printf("Waiting for FIFO count > 2...\n");
+            // printf("Waiting for FIFO count > 2...\n");
             while ((fifoCount = getFIFOCount()) < 3);
 
-            printf("Current FIFO count=%d",fifoCount);
+            // printf("Current FIFO count=%d",fifoCount);
             DEBUG_PRINTLN(fifoCount);
             DEBUG_PRINTLN(F("Reading FIFO data..."));
             getFIFOBytes(fifoBuffer, fifoCount);
