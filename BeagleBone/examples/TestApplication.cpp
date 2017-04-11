@@ -1,15 +1,16 @@
-#include <assert.h>
+/*#include <assert.h>
 #include <chrono>
-#include <csignal>
 #include <cstdlib>
 #include <cstring>
 #include <inttypes.h>
-#include <iostream>
 #include <memory>
-#include <string>
 #include <termios.h>
+#include <unistd.h>*/
+
+#include <csignal>
+#include <iostream>
+#include <string>
 #include <thread>
-#include <unistd.h>
 
 #include "../Motors/Motors.h"
 // #include "../Battery/battery.h"
@@ -26,7 +27,6 @@ enum Position {
 Motors silniki;
 IMU imu;
 Controller pid;
-int balancingActive;
 volatile Position actual;
 volatile int exitFlag = 0;
 
@@ -42,31 +42,46 @@ void balancing() {
 	float finalRightSpeed = 0;
 
 	while (!exitFlag) {
-		// get 4 reads and take out average
-		float angle = 0.0;
-		angle += imu.getRoll();
-		usleep(50);
-		angle += imu.getRoll();
-		usleep(50);
-		angle += imu.getRoll();
-		usleep(50);
-		angle += imu.getRoll();
-		usleep(50);
-		angle = angle/4*180/3.1415;
-		pid.calculate_speed(angle, silniki.getSpeedLeft(), silniki.getSpeedRight(), steering, throttle, finalLeftSpeed, finalRightSpeed);
-		if (balancingActive) {
-			silniki.setSpeed(finalLeftSpeed, finalRightSpeed,  4);
-			std::cout << "I'm balancing, angle: " << angle << std::endl;
-		}
+		// Update odometry with given loop time (dt)
+		silniki.updateOdometry(0.0);
 
+		// Retrieve 4 IMU readings and calculate average (noise reduction)
+		float angle = 0.0;
+		try {
+			angle += imu.getRoll();
+			usleep(50);
+			angle += imu.getRoll();
+			usleep(50);
+			angle += imu.getRoll();
+			usleep(50);
+			angle += imu.getRoll();
+			usleep(50);
+		} catch (std::string & error) {
+			std::cout << "Error getting IMU reading: " << error << std::endl;
+			exitFlag = 1;
+			break;
+		}
+		angle = angle/4*180/3.1415;
+
+		// Set current position
 		if (angle > 40.0) {
 			actual = Position::layfront;
-			balancingActive = 0;
 		} else if (angle < -40.0) {
 			actual = Position::layback;
-			balancingActive = 0;
 		} else {
 			actual = Position::standing;
+			std::cout << "I'm balancing, angle: " << angle << std::endl;
+
+			// Calculate target speeds for motors
+			pid.calculate_speed(angle, silniki.getSpeedLeft(), silniki.getSpeedRight(), steering, throttle, finalLeftSpeed, finalRightSpeed);
+			// Set target speeds
+			try {
+				silniki.setSpeed(finalLeftSpeed, finalRightSpeed, 4);
+			} catch (std::string & error) {
+				std::cout << "Error setting motors speed: " << error << std::endl;
+				exitFlag = 1;
+				break;
+			}
 		}
 	}
 }
@@ -74,61 +89,73 @@ void balancing() {
 int main() {
 	signal(SIGINT, sigintHandler);
 
-	silniki.initialize();
-	imu.initialize();
-	usleep(1000);
+	try {
+		silniki.initialize();
+		imu.initialize();
+	} catch (std::string & error) {
+		std::cout << "Error initializing: " << error << std::endl;
+		return 1;
+	}
 
-	silniki.enable();
+	usleep(100 * 1000);
+
 	/*if (!lipol.isGood()) {
 		printf("niski poziom napiecia baterii");
 	}*/
-	imu.resetFIFO();
-	pid.timerStart();
+	try {
+		silniki.enable();
+		imu.resetFIFO();
+		pid.timerStart();
+	} catch (std::string & error) {
+		std::cout << "Error starting up: " << error << std::endl;
+		return 2;
+	}
 
 	std::thread balance(balancing);
-	usleep(1000000);
+	usleep(1000 * 1000);
+	std::cout<< "4\n";
 	while(!exitFlag) {
 		switch (actual) {
 			case standing:
-				balancingActive = 1;
-				usleep(200000);
+				usleep(500 * 1000);
 				break;
 			case layfront:
-				std::cout << "I'm trying to stand front" << std::endl;
-				silniki.setSpeed(0.0, 0.0, 1);
-				silniki.disable();
-				// 5s
-				usleep(5000000);
-				silniki.enable();
-				silniki.setSpeed(700.0, 700.0, 1);
-				// 1s
-				usleep(1000000);
-				silniki.setSpeed(-700.0, -700.0, 1);
-				usleep(500000);
-				// actual = Position::standing;
-				std::cout << "I'm standing(?)" << std::endl;
-				break;
 			case layback:
-				std::cout << "I'm trying to stand back" << std::endl;
-				silniki.setSpeed(0.0, 0.0, 1);
-				silniki.disable();
-				usleep(5000000);
-				silniki.enable();
-				silniki.setSpeed(-700.0, -700.0, 1);
-				usleep(1000000);
-				silniki.setSpeed(700.0, 700.0, 1);
-				usleep(500000);
-				// actual = Position::standing;
+				std::cout << "I'm trying to stand" << std::endl;
+				int mult = (actual == layfront ? 1 : -1);
+				try {
+					silniki.setSpeed(0.0, 0.0, 1);
+					silniki.disable();
+					// 5s
+					usleep(5000 * 1000);
+					silniki.enable();
+					silniki.setSpeed(mult * 700.0, mult * 700.0, 1);
+					// 1s
+					usleep(1000 * 1000);
+					silniki.setSpeed(-mult * 700.0, -mult * 700.0, 1);
+					usleep(500 * 1000);
+				} catch (std::string & error) {
+					std::cout << "Error standing up from laying: " << error << std::endl;
+					exitFlag = 1;
+					break;
+				}
 				std::cout << "I'm standing(?)" << std::endl;
 				break;
 		}
 	}
 
+	std::cout << "Closing..." << std::endl;
+
 	balance.join();
-	silniki.setSpeed(0.0, 0.0, 1);
-	silniki.disable();
+	try {
+		silniki.setSpeed(0.0, 0.0, 1);
+		silniki.disable();
+	} catch (std::string & error) {
+		std::cout << "Error disabling motors: " << error << std::endl;
+		return 3;
+	}
 	// 1s
-	usleep(1000000);
+	usleep(1000 * 1000);
 
 	return 0;
 }
