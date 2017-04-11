@@ -1,4 +1,5 @@
 #include "Controller.h"
+#include <iostream>
 
 Controller::Controller() {
 	timePoint = std::chrono::high_resolution_clock::now();
@@ -32,29 +33,17 @@ float Controller::timerValue() {
 }
 
 float Controller::stabilityControl(float value, float setPoint, float dt) {
-	// dt *= 1000;
-
 	float error = setPoint - value;
 	this->anglePIDIntegral += error * dt;
 
 	float derivative = (error - this->anglePIDError) / dt;
 	this->anglePIDError = error;
 
-	return anglePIDKp * error + anglePIDKi * this->anglePIDIntegral + anglePIDKd * derivative;
-
-	/*// Kd is implemented in two parts
-	// The biggest one using only the input (sensor) part not the SetPoint input-input(t-2)
-	// And the second using the setpoint to make it a bit more agressive setPoint-setPoint(t-1)
-	float derivative = ((setPoint - setPointOld) - (value - PID_errorOld2)) / dt;
-	float output = Kp * error + Kd * derivative;
-	PID_errorOld2 = PID_errorOld;
-	// error for Kd is only the input component
-	PID_errorOld = value;
-	setPointOld = setPoint;
-	return output;*/
+	return (anglePIDKp * error + anglePIDKi * this->anglePIDIntegral + anglePIDKd * derivative);
 }
 
 float Controller::speedControl(float value, float setPoint, float dt) {
+	// Max error value clipping
 	float error = setPoint - value;
 	if (error > SPEED_MAX_ERROR) {
 		error = SPEED_MAX_ERROR;
@@ -64,6 +53,8 @@ float Controller::speedControl(float value, float setPoint, float dt) {
 
 	this->speedPIDIntegral += error * dt;
 	float maxIntegral = SPEED_MAX_INTEGRAL * dt;
+
+	// Max integral value clipping
 	if (this->speedPIDIntegral > maxIntegral) {
 		this->speedPIDIntegral = maxIntegral;
 	} else if (this->speedPIDIntegral < -maxIntegral) {
@@ -73,53 +64,35 @@ float Controller::speedControl(float value, float setPoint, float dt) {
 	float derivative = (error - this->speedPIDError) / dt;
 	this->speedPIDError = error;
 
-	return speedPIDKp * error + speedPIDKi * this->speedPIDIntegral + speedPIDKd * derivative;
-
-	/*float error = setPoint - input;
-	if (error > ITERM_MAX_ERROR) {
-		error = ITERM_MAX_ERROR;
-	} else if (error < -ITERM_MAX_ERROR) {
-		error = -ITERM_MAX_ERROR;
-	}
-
-	PID_errorSum += error;
-	if (PID_errorSum > ITERM_MAX) {
-		PID_errorSum = ITERM_MAX;
-	} else if (PID_errorSum < -ITERM_MAX) {
-		PID_errorSum = -ITERM_MAX;
-	}
-
-	// DT is in miliseconds...
-	return Kp * error + Ki * PID_errorSum * DT * 0.001;*/
+	return (speedPIDKp * error + speedPIDKi * this->speedPIDIntegral + speedPIDKd * derivative);
 }
 
 void Controller::calculateSpeed(float angle, float speedLeft, float speedRight, int steering, int throttle, float &speedLeftNew, float &speedRightNew) {
 	this->timePoint = std::chrono::high_resolution_clock::now();
-	// float dt = timerValue()*1000;
 	float loopTime = timerValue();
 	this->timePointPrevious = this->timePoint;
 
 	this->anglePrevious = this->angle;
 	this->angle = angle;
 
-	this->speedPrevious = this->speed;
 	// Positive: forward
+	this->speedPrevious = this->speed;
 	this->speed = (speedLeft + speedRight) / 2;
 
-	///TODO: decipher this, improve?
+	// Estimate robot's velocity based on angle change and speed
 	// 90 is an empirical extracted factor to adjust for real units
-	float angularVelocity = (this->angle - this->anglePrevious) * 90.0;
+	// float angularVelocity = (this->angle - this->anglePrevious) * 90.0;
+	float angularVelocity = (this->angle - this->anglePrevious) * 90.0 * loopTime;
 	// We use robot_speed(t-1) to compensate the delay
 	float estimatedSpeed = -this->speedPrevious - angularVelocity;
-	// low pass filter on estimated speed
-	this->speedFiltered = speedFiltered * 0.95 + estimatedSpeed * 0.05;
-	///TODO END
+	// Low pass / integrating filter on estimated speed
+	this->speedFiltered = this->speedFiltered * 0.95 + estimatedSpeed * 0.05;
 
-	// Speed control
-	// input: user throttle
+	// First control layer: speed control PID
+	// input: user throttle (0)
 	// setPoint: estimated and filtered robot speed
 	// output: target robot angle to get the desired speed
-	float targetAngle = speedControl(speedFiltered, throttle, loopTime);
+	float targetAngle = speedControl(this->speedFiltered, throttle, loopTime);
 	if (targetAngle > MAX_ANGLE) {
 		targetAngle = MAX_ANGLE;
 	} else if (targetAngle < -MAX_ANGLE) {
@@ -128,7 +101,7 @@ void Controller::calculateSpeed(float angle, float speedLeft, float speedRight, 
 
 	//??? We integrate the output (sumatory), so the output is really the motor acceleration, not motor speed.
 
-	// Stability control
+	// Second control layer: stability (angle) control PID
 	// input: robot target angle(from SPEED CONTROL)
 	// variable: robot angle
 	// output: Motor speed
@@ -139,19 +112,27 @@ void Controller::calculateSpeed(float angle, float speedLeft, float speedRight, 
 		output = -MAX_OUTPUT;
 	}
 
+	std::cout << "Angle: " << angle;
+	std::cout << " Angular velocity: " << angularVelocity;
+	std::cout << " Estimated speed: " << estimatedSpeed;
+	std::cout << " Target angle: " << targetAngle;
+	std::cout << " Output: " << output;
+	std::cout << " LoopTime: " << loopTime;
+	std::cout << std::endl;
+
 	// The steering part from the user is injected directly into the output
 	speedLeftNew = output + steering;
 	speedRightNew = output - steering;
-}
-
-void Controller::setStabilityPID(float kp, float ki, float kd) {
-	this->anglePIDKp = kp;
-	this->anglePIDKi = kd;
-	this->anglePIDKd = ki;
 }
 
 void Controller::setSpeedPID(float kp, float ki, float kd) {
 	this->speedPIDKp = kp;
 	this->speedPIDKi = kd;
 	this->speedPIDKd = ki;
+}
+
+void Controller::setStabilityPID(float kp, float ki, float kd) {
+	this->anglePIDKp = kp;
+	this->anglePIDKi = kd;
+	this->anglePIDKd = ki;
 }

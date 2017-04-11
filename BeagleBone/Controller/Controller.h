@@ -41,15 +41,15 @@ class Controller {
 		float speedPIDIntegral;
 		float speedPIDError;
 
-		// PD controller implementation(Proportional, derivative). DT is in miliseconds
-		float stabilityControl(float value, float setPoint, float dt);
 		// PI controller implementation (Proportional, integral). DT is in miliseconds
 		float speedControl(float value, float setPoint, float dt);
+		// PD controller implementation(Proportional, derivative). DT is in miliseconds
+		float stabilityControl(float value, float setPoint, float dt);
 	public:
 		Controller();
 		~Controller();
-		void setStabilityPID(float kp, float ki, float kd);
 		void setSpeedPID(float kp, float ki, float kd);
+		void setStabilityPID(float kp, float ki, float kd);
 		void calculateSpeed(float angle, float speedLeft, float speedRight, int steering, int throttle, float &speedLeftNew, float &speedRightNew);
 		float timerValue();
 		void restartTimer();
