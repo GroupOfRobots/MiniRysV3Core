@@ -61,10 +61,10 @@ void balancing() {
 			actual = Position::layback;
 		} else {
 			actual = Position::standing;
-			std::cout << "I'm balancing, angle: " << angle << std::endl;
 
 			// Calculate target speeds for motors
 			controller.calculateSpeed(angle, motors.getSpeedLeft(), motors.getSpeedRight(), steering, throttle, finalLeftSpeed, finalRightSpeed);
+			// std::cout << "I'm balancing, angle: " << angle << " speed: " << finalLeftSpeed << std::endl;
 			// Set target speeds
 			try {
 				motors.setSpeed(finalLeftSpeed, finalRightSpeed, 4);
@@ -73,6 +73,7 @@ void balancing() {
 				// exitFlag = 1;
 				break;
 			}
+
 		}
 	}
 }
@@ -90,8 +91,11 @@ int main() {
 
 	usleep(100 * 1000);
 
+	// Original values
+	// controller.setSpeedPID(0.009, 0.1, 0);
+	// controller.setStabilityPID(50, 0, 20);
+	controller.setSpeedPID(0.009, 0.01, 0);
 	controller.setStabilityPID(50, 0, 20);
-	controller.setSpeedPID(0.009, 0.1, 0);
 
 	/*if (!lipol.isGood()) {
 		printf("niski poziom napiecia baterii");
