@@ -52,7 +52,8 @@ float Controller::speedControl(float value, float setPoint, float dt) {
 	}
 
 	this->speedPIDIntegral += error * dt;
-	float maxIntegral = SPEED_MAX_INTEGRAL * dt;
+	// float maxIntegral = SPEED_MAX_INTEGRAL * dt;
+	float maxIntegral = SPEED_MAX_INTEGRAL;
 
 	// Max integral value clipping
 	if (this->speedPIDIntegral > maxIntegral) {
@@ -112,12 +113,12 @@ void Controller::calculateSpeed(float angle, float speedLeft, float speedRight, 
 		output = -MAX_OUTPUT;
 	}
 
-	std::cout << "Angle: " << angle;
-	std::cout << " Angular velocity: " << angularVelocity;
-	std::cout << " Estimated speed: " << estimatedSpeed;
+	std::cout << " LoopTime: " << loopTime;
+	std::cout << " Angle: " << angle;
+	// std::cout << " Angular velocity: " << angularVelocity;
+	// std::cout << " Estimated speed: " << estimatedSpeed;
 	std::cout << " Target angle: " << targetAngle;
 	std::cout << " Output: " << output;
-	std::cout << " LoopTime: " << loopTime;
 	std::cout << std::endl;
 
 	// The steering part from the user is injected directly into the output

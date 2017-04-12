@@ -129,7 +129,7 @@ void Motors::setSpeed(float speedLeft, float speedRight, int microstep) {
 		std::cout << "Failed writing to file: " << DEVICE_NAME << std::endl;
 	} else {
 		this->pruFile.write((char*)(&dataFrame), (int)(sizeof(DataFrame)));
-		std::cout << "Writing: " << (dataFrame.directionLeft == 0 ? '0' : ' ') << (dataFrame.directionLeft == 1 ? '1' : ' ') << " " << dataFrame.speedLeft << std::endl;
+		// std::cout << "Writing: " << (dataFrame.directionLeft == 0 ? '0' : ' ') << (dataFrame.directionLeft == 1 ? '1' : ' ') << " " << dataFrame.speedLeft << std::endl;
 	}
 	this->pruFile.close();
 }
