@@ -42,17 +42,17 @@ void balancing() {
 			angle += imu.getRoll();
 			usleep(50);
 			angle += imu.getRoll();
-			usleep(50);
-			angle += imu.getRoll();
-			usleep(50);
-			angle += imu.getRoll();
-			usleep(50);
+			// usleep(50);
+			// angle += imu.getRoll();
+			// usleep(50);
+			// angle += imu.getRoll();
+			// usleep(50);
 		} catch (std::string & error) {
 			std::cout << "Error getting IMU reading: " << error << std::endl;
 			exitFlag = 1;
 			break;
 		}
-		angle = angle/4*180/3.1415;
+		angle = angle/2*180/3.1415;
 
 		// Set current position
 		if (angle > 40.0) {
@@ -94,8 +94,8 @@ int main() {
 	// Original values
 	// controller.setSpeedPID(0.009, 0.1, 0);
 	// controller.setStabilityPID(50, 0, 20);
-	controller.setSpeedPID(0.009, 0.01, 0);
-	controller.setStabilityPID(50, 0, 20);
+	controller.setSpeedPID(0.03, 0.0001, 0.008);
+	controller.setStabilityPID(50, 0.05, 20);
 
 	/*if (!lipol.isGood()) {
 		printf("niski poziom napiecia baterii");
