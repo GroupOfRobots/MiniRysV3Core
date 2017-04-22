@@ -2,7 +2,7 @@
 Przykład sterowania silnikami robota na podstawie odczytu odległości z czujnika
 
 
-#include "../Motors/motors.h"
+#include "../Motors/Motors.h"
 #include "../Sonar/sonar.h"
 
 Motors silniki;
