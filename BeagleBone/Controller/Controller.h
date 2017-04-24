@@ -51,6 +51,7 @@ class Controller {
 		void setSpeedPID(float kp, float ki, float kd);
 		void setStabilityPID(float kp, float ki, float kd);
 		void calculateSpeed(float angle, float speedLeft, float speedRight, int steering, int throttle, float &speedLeftNew, float &speedRightNew);
+		void zeroPIDs();
 		float timerValue();
 		void restartTimer();
 };

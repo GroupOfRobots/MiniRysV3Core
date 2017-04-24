@@ -126,6 +126,13 @@ void Controller::calculateSpeed(float angle, float speedLeft, float speedRight, 
 	speedRightNew = output - steering;
 }
 
+void Controller::zeroPIDs() {
+	this->anglePIDIntegral = 0;
+	this->anglePIDError = 0;
+	this->speedPIDIntegral = 0;
+	this->speedPIDError = 0;
+}
+
 void Controller::setSpeedPID(float kp, float ki, float kd) {
 	this->speedPIDKp = kp;
 	this->speedPIDKi = kd;
