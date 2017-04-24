@@ -105,9 +105,10 @@ void balancing() {
 			minDuration = duration;
 		}
 
+		++iterations;
 		// Sleep until next
 		nextTimePoint += loopTime;
-		++iterations;
+		std::this_thread::sleep_until(nextTimePoint);
 	}
 
 	if (iterations == 0) {
