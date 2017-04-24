@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-Wall -Wextra
+CXXFLAGS=-Wall -Wextra -std=gnu++11
 LFLAGS=-lpthread
 
 OBJS=build/battery.o
