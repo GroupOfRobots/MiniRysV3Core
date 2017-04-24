@@ -114,11 +114,11 @@ void Controller::calculateSpeed(float angle, float speedLeft, float speedRight, 
 	}
 
 	std::cout << " LoopTime: " << loopTime;
-	std::cout << " Angle: " << angle;
+	// std::cout << " Angle: " << angle;
 	// std::cout << " Angular velocity: " << angularVelocity;
 	// std::cout << " Estimated speed: " << estimatedSpeed;
 	std::cout << " Target angle: " << targetAngle;
-	std::cout << " Output: " << output;
+	// std::cout << " Output: " << output;
 	std::cout << std::endl;
 
 	// The steering part from the user is injected directly into the output

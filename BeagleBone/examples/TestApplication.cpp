@@ -1,3 +1,4 @@
+#include <chrono>
 #include <csignal>
 #include <iostream>
 #include <string>
@@ -31,6 +32,20 @@ void balancing() {
 	int throttle = 0;
 	float finalLeftSpeed = 0;
 	float finalRightSpeed = 0;
+
+	// auto loopTime = 100ms;
+	auto loopTime = std::chrono::milliseconds(10);
+	// Loop time in nanoseconds
+	// uint64_t loopTime = 1000*1000*1000*(1/loopFrequency);
+
+	// Durations in nanoseconds
+	uint64_t totalDuration = 0;
+	uint64_t maxDuration = 0;
+	uint64_t minDuration = 1000*1000*1000;
+	uint64_t iterations = 0;
+	// std::chrono::steady_clock::time_point
+	auto nextTimePoint = std::chrono::steady_clock::now();
+	auto previousTimePoint = nextTimePoint - loopTime;
 
 	while (!exitFlag) {
 		// Update odometry with given loop time (dt)
@@ -73,9 +88,36 @@ void balancing() {
 				// exitFlag = 1;
 				break;
 			}
-
 		}
+
+		// Calculate duration of current iteration
+		auto now = std::chrono::steady_clock::now();
+		uint64_t duration = (std::chrono::duration_cast<std::chrono::nanoseconds>(now - previousTimePoint)).count();
+		// Save current time as reference for next iteration
+		previousTimePoint = now;
+		// Add total measurements duration
+		totalDuration += duration;
+		// Check and save max and min iteration duration
+		if (duration > maxDuration) {
+			maxDuration = duration;
+		}
+		if (duration < minDuration) {
+			minDuration = duration;
+		}
+
+		// Sleep until next
+		nextTimePoint += loopTime;
+		++iterations;
 	}
+
+	if (iterations == 0) {
+		iterations = 1;
+	}
+
+	std::cout << "\nMax duration: " << maxDuration << "ns" << std::endl;
+	std::cout << "Min duration: " << minDuration << "ns" << std::endl;
+	std::cout << "Avg duration: " << totalDuration/iterations << "ns" << std::endl;
+	std::cout << "Avg frequency: " << 1000000000/(totalDuration/iterations) << "Hz" << std::endl;
 }
 
 int main() {
