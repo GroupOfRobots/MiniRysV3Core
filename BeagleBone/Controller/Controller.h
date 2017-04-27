@@ -8,14 +8,11 @@
 
 #define MAX_THROTTLE 580
 #define MAX_STEERING 150
-#define MAX_ANGLE 14
+#define MAX_ANGLE 15
 #define MAX_OUTPUT 900
 
-#define KP 50
-#define KD 23
-#define KP_THROTTLE 0.009
-#define KI_THROTTLE 0.1
-
+#define ANGLE_MAX_ERROR 25
+#define ANGLE_MAX_INTEGRAL 250
 #define SPEED_MAX_ERROR 500
 #define SPEED_MAX_INTEGRAL 5000
 

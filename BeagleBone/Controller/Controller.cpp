@@ -35,7 +35,19 @@ float Controller::timerValue() {
 
 float Controller::stabilityControl(float value, float setPoint, float dt) {
 	float error = setPoint - value;
+	if (error > ANGLE_MAX_ERROR) {
+		error = ANGLE_MAX_ERROR;
+	} else if (error < -ANGLE_MAX_ERROR) {
+		error = -ANGLE_MAX_ERROR;
+	}
+
 	this->anglePIDIntegral += error * dt;
+	// Max integral value clipping
+	if (this->anglePIDIntegral > ANGLE_MAX_INTEGRAL) {
+		this->anglePIDIntegral = ANGLE_MAX_INTEGRAL;
+	} else if (this->anglePIDIntegral < -ANGLE_MAX_INTEGRAL) {
+		this->anglePIDIntegral = -ANGLE_MAX_INTEGRAL;
+	}
 
 	float derivative = (error - this->anglePIDError) / dt;
 	this->anglePIDError = error;
@@ -53,14 +65,12 @@ float Controller::speedControl(float value, float setPoint, float dt) {
 	}
 
 	this->speedPIDIntegral += error * dt;
-	// float maxIntegral = SPEED_MAX_INTEGRAL * dt;
-	float maxIntegral = SPEED_MAX_INTEGRAL;
 
 	// Max integral value clipping
-	if (this->speedPIDIntegral > maxIntegral) {
-		this->speedPIDIntegral = maxIntegral;
-	} else if (this->speedPIDIntegral < -maxIntegral) {
-		this->speedPIDIntegral = -maxIntegral;
+	if (this->speedPIDIntegral > SPEED_MAX_INTEGRAL) {
+		this->speedPIDIntegral = SPEED_MAX_INTEGRAL;
+	} else if (this->speedPIDIntegral < -SPEED_MAX_INTEGRAL) {
+		this->speedPIDIntegral = -SPEED_MAX_INTEGRAL;
 	}
 
 	float derivative = (error - this->speedPIDError) / dt;
@@ -83,7 +93,6 @@ void Controller::calculateSpeed(float angle, float speedLeft, float speedRight, 
 
 	// Estimate robot's velocity based on angle change and speed
 	// 90 is an empirical extracted factor to adjust for real units
-	// float angularVelocity = (this->angle - this->anglePrevious) * 90.0;
 	float angularVelocity = (this->angle - this->anglePrevious) * 90.0 * loopTime;
 	// We use robot_speed(t-1) to compensate the delay
 	float estimatedSpeed = -this->speedPrevious - angularVelocity;
@@ -101,8 +110,6 @@ void Controller::calculateSpeed(float angle, float speedLeft, float speedRight, 
 		targetAngle = -MAX_ANGLE;
 	}
 
-	//??? We integrate the output (sumatory), so the output is really the motor acceleration, not motor speed.
-
 	// Second control layer: stability (angle) control PID
 	// input: robot target angle(from SPEED CONTROL)
 	// variable: robot angle
@@ -113,14 +120,6 @@ void Controller::calculateSpeed(float angle, float speedLeft, float speedRight, 
 	} else if (output < -MAX_OUTPUT) {
 		output = -MAX_OUTPUT;
 	}
-
-	// std::cout << " LoopTime: " << loopTime;
-	// std::cout << " Angle: " << angle;
-	// std::cout << " Angular velocity: " << angularVelocity;
-	// std::cout << " Estimated speed: " << estimatedSpeed;
-	// std::cout << " Target angle: " << targetAngle;
-	// std::cout << " Output: " << output;
-	// std::cout << std::endl;
 
 	// The steering part from the user is injected directly into the output
 	speedLeftNew = output + steering;
