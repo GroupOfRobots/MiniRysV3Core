@@ -29,17 +29,14 @@ void sigintHandler(int) {
 
 void inertialUnitThreadFn() {
 	while (!exitFlag) {
-		// Retrieve 2 IMU readings and calculate average (noise reduction)
-		float angle = 0.0;
 		try {
-			angle += imu.getRoll();
-			angle += imu.getRoll();
+			angle = imu.getRoll() * 180 / 3.1415;
+			std::cout << "IMU reading: " << angle << std::endl;
 		} catch (std::string & error) {
 			std::cout << "Error getting IMU reading: " << error << std::endl;
 			exitFlag = 1;
 			break;
 		}
-		angle = angle/2*180/3.1415;
 	}
 
 	std::cout << "IMU thread ended!\n";
@@ -119,7 +116,7 @@ void balancingThreadFn() {
 	std::cout << "\nMax duration: " << maxDuration << "ns" << std::endl;
 	std::cout << "Min duration: " << minDuration << "ns" << std::endl;
 	std::cout << "Avg duration: " << totalDuration/iterations << "ns" << std::endl;
-	std::cout << "Avg frequency: " << 1000000000/(totalDuration/iterations) << "Hz" << std::endl;
+	std::cout << "Avg frequency: " << 1000000000.0/(totalDuration/iterations) << "Hz" << std::endl;
 }
 
 int main() {
@@ -139,11 +136,9 @@ int main() {
 
 	std::cout << "Setup...\n";
 
-	// controller.setSpeedPID(0.03, 0.0001, 0.008);
-	controller.setSpeedPID(0.03, 0.0002, 0.01);
-	// controller.setStabilityPID(50, 0.05, 20);
-	controller.setStabilityPID(50, 0.03, 20);
-	controller.setSpeedFilterFactor(0.92);
+	controller.setSpeedPID(0.03, 0.0001, 0.008);
+	controller.setStabilityPID(50, 0.05, 20);
+	controller.setSpeedFilterFactor(0.95);
 
 	/*if (!lipol.isGood()) {
 		printf("niski poziom napiecia baterii");
@@ -167,9 +162,11 @@ int main() {
 	std::cout << "Running!\n";
 
 	while(!exitFlag) {
+		float localAngle = angle;
 		switch (actual) {
 			case standing:
 				// 0.5s
+				std::cout << "Standing, angle: " << localAngle << std::endl;
 				usleep(500 * 1000);
 				break;
 			case layfront:
@@ -192,9 +189,9 @@ int main() {
 					motors.setSpeed(-mult * 600.0, -mult * 600.0, 1);
 					// Wait until we're vertical enough
 					while (true) {
-						float localAngle = angle;
+						localAngle = angle;
 						// +- 5 deg should be enough
-						if (localAngle > -5 && localAngle < 5) {
+						if (localAngle > -3 && localAngle < 3) {
 							std::cout << "Stood up(?), angle: " << localAngle << std::endl;
 							break;
 						}
