@@ -122,6 +122,7 @@ int main() {
 	try {
 		motors.initialize();
 		imu.initialize();
+		imu.calibrate();
 	} catch (std::string & error) {
 		std::cout << "Error initializing: " << error << std::endl;
 		return 1;
@@ -133,7 +134,7 @@ int main() {
 	controller.setSpeedPID(0.03, 0.0002, 0.01);
 	// controller.setStabilityPID(50, 0.05, 20);
 	controller.setStabilityPID(50, 0.03, 20);
-	controller.setSpeedFilterFactor(0.9);
+	controller.setSpeedFilterFactor(0.97);
 
 	/*if (!lipol.isGood()) {
 		printf("niski poziom napiecia baterii");
@@ -166,6 +167,7 @@ int main() {
 					// 2s
 					usleep(2000 * 1000);
 					motors.enable();
+					usleep(500 * 1000);
 
 					// Drive backwards full-speed
 					motors.setSpeed(mult * 400.0, mult * 400.0, 1);
@@ -174,9 +176,8 @@ int main() {
 					// Drive forward full-speed
 					motors.setSpeed(-mult * 600.0, -mult * 600.0, 1);
 					// Wait until we're vertical enough
-					float verticalBoundary = 5 * 3.1415 / 180;
 					while (true) {
-						usleep(50);
+						usleep(100);
 						float angle = 0.0;
 						try {
 							angle = imu.getRoll();
@@ -185,10 +186,10 @@ int main() {
 							exitFlag = 1;
 							break;
 						}
+						angle = angle * 180/3.1415;
 
 						// +- 5 deg should be enough
-
-						if (angle > -verticalBoundary && angle < verticalBoundary) {
+						if (angle > -5 && angle < 5) {
 							break;
 						}
 					}
