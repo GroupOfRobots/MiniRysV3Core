@@ -57,11 +57,6 @@ void balancing() {
 			angle += imu.getRoll();
 			usleep(50);
 			angle += imu.getRoll();
-			// usleep(50);
-			// angle += imu.getRoll();
-			// usleep(50);
-			// angle += imu.getRoll();
-			// usleep(50);
 		} catch (std::string & error) {
 			std::cout << "Error getting IMU reading: " << error << std::endl;
 			exitFlag = 1;
@@ -134,10 +129,10 @@ int main() {
 
 	usleep(100 * 1000);
 
-	// Original values
 	// controller.setSpeedPID(0.03, 0.0001, 0.008);
-	controller.setSpeedPID(0.03, 0.0001, 0.01);
-	controller.setStabilityPID(50, 0.05, 20);
+	controller.setSpeedPID(0.03, 0.0002, 0.01);
+	// controller.setStabilityPID(50, 0.05, 20);
+	controller.setStabilityPID(50, 0.03, 20);
 	controller.setSpeedFilterFactor(0.9);
 
 	/*if (!lipol.isGood()) {
@@ -153,11 +148,12 @@ int main() {
 	}
 
 	std::thread balance(balancing);
+	// 1s
 	usleep(1000 * 1000);
-	std::cout<< "4\n";
 	while(!exitFlag) {
 		switch (actual) {
 			case standing:
+				// 0.5s
 				usleep(500 * 1000);
 				break;
 			case layfront:
@@ -167,15 +163,31 @@ int main() {
 				try {
 					motors.setSpeed(0.0, 0.0, 1);
 					motors.disable();
-					// 3s
-					usleep(3000 * 1000);
+					// 2s
+					usleep(2000 * 1000);
 					motors.enable();
 					motors.setSpeed(mult * 400.0, mult * 400.0, 1);
 					// 0.5s
 					usleep(500 * 1000);
 					motors.setSpeed(-mult * 600.0, -mult * 600.0, 1);
-					// 0.5s
-					usleep(500 * 1000);
+
+					// Stand up until we're vertical enough
+					while (true) {
+						usleep(50);
+						float angle = 0.0;
+						try {
+							angle = imu.getRoll();
+						} catch (std::string & error) {
+							std::cout << "Error getting IMU reading: " << error << std::endl;
+							exitFlag = 1;
+							break;
+						}
+
+						// +- 5 deg should be enough
+						if (angle > -5 && angle < 5) {
+							break;
+						}
+					}
 					controller.zeroPIDs();
 				} catch (std::string & error) {
 					std::cout << "Error standing up from laying: " << error << std::endl;
