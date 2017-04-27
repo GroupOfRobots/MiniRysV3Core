@@ -41,6 +41,8 @@ void inertialUnitThreadFn() {
 		}
 		angle = angle/2*180/3.1415;
 	}
+
+	std::cout << "IMU thread ended!\n";
 }
 
 void balancingThreadFn() {
@@ -67,17 +69,18 @@ void balancingThreadFn() {
 		// Update odometry with given loop time (dt)
 		motors.updateOdometry(0.0);
 
+		float localAngle = angle;
 		// Set current position
-		if (angle > 40.0) {
+		if (localAngle > 40.0) {
 			actual = Position::layfront;
-		} else if (angle < -40.0) {
+		} else if (localAngle < -40.0) {
 			actual = Position::layback;
 		} else {
 			actual = Position::standing;
 
 			// Calculate target speeds for motors
-			controller.calculateSpeed(angle, motors.getSpeedLeft(), motors.getSpeedRight(), steering, throttle, finalLeftSpeed, finalRightSpeed);
-			// std::cout << "I'm balancing, angle: " << angle << " speed: " << finalLeftSpeed << std::endl;
+			controller.calculateSpeed(localAngle, motors.getSpeedLeft(), motors.getSpeedRight(), steering, throttle, finalLeftSpeed, finalRightSpeed);
+
 			// Set target speeds
 			try {
 				motors.setSpeed(finalLeftSpeed, finalRightSpeed, 4);
@@ -122,16 +125,19 @@ void balancingThreadFn() {
 int main() {
 	signal(SIGINT, sigintHandler);
 
+	std::cout << "Initializing...\n";
+
 	try {
 		motors.initialize();
 		imu.initialize();
-		imu.calibrate();
+		// imu.calibrate();
 	} catch (std::string & error) {
 		std::cout << "Error initializing: " << error << std::endl;
 		return 1;
 	}
-
 	usleep(100 * 1000);
+
+	std::cout << "Setup...\n";
 
 	// controller.setSpeedPID(0.03, 0.0001, 0.008);
 	controller.setSpeedPID(0.03, 0.0002, 0.01);
@@ -151,10 +157,15 @@ int main() {
 		return 2;
 	}
 
+	std::cout << "Starting threads...\n";
+
 	std::thread imuThread(inertialUnitThreadFn);
 	std::thread balanceThread(balancingThreadFn);
 	// 1s
 	usleep(1000 * 1000);
+
+	std::cout << "Running!\n";
+
 	while(!exitFlag) {
 		switch (actual) {
 			case standing:
@@ -181,9 +192,10 @@ int main() {
 					motors.setSpeed(-mult * 600.0, -mult * 600.0, 1);
 					// Wait until we're vertical enough
 					while (true) {
+						float localAngle = angle;
 						// +- 5 deg should be enough
-						if (angle > -5 && angle < 5) {
-							std::cout << "Stood up(?), angle: " << angle << std::endl;
+						if (localAngle > -5 && localAngle < 5) {
+							std::cout << "Stood up(?), angle: " << localAngle << std::endl;
 							break;
 						}
 					}
