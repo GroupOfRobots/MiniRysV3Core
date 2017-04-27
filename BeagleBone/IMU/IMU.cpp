@@ -104,12 +104,21 @@ void IMU::resetFIFO() {
 void IMU::calibrate() {
 	std::cout << "Fix the position and hit enter\n";
 	std::cin.get();
-	this->offsetXAcceleration = 0;
-	this->offsetYAcceleration = 0;
-	this->offsetZAcceleration = 0;
-	this->offsetXRotation = 0;
-	this->offsetYRotation = 0;
-	this->offsetZRotation = 0;
+	this->offsetXAcceleration = this->mpu->setXAccelOffset();
+	this->offsetYAcceleration = this->mpu->setYAccelOffset();
+	this->offsetZAcceleration = this->mpu->setZAccelOffset();
+	this->offsetXRotation = this->mpu->setXGyroOffset();
+	this->offsetYRotation = this->mpu->setYGyroOffset();
+	this->offsetZRotation = this->mpu->setZGyroOffset();
+
+	std::cout << "calibration initial values:\n";
+	std::cout << "\tXAcceleration: " << this->offsetXAcceleration << std::endl;
+	std::cout << "\tYAcceleration: " << this->offsetYAcceleration << std::endl;
+	std::cout << "\tZAcceleration: " << this->offsetZAcceleration << std::endl;
+	std::cout << "\tXRotation: " << this->offsetXRotation << std::endl;
+	std::cout << "\tYRotation: " << this->offsetYRotation << std::endl;
+	std::cout << "\tZRotation: " << this->offsetZRotation << std::endl;
+
 	for (int i = 0; i < IMU_CALIBRATION_READINGS; ++i) {
 		int16_t ax, ay, az, gx, gy, gz;
 		this->mpu->getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
@@ -129,18 +138,20 @@ void IMU::calibrate() {
 	this->offsetYRotation /= IMU_CALIBRATION_READINGS;
 	this->offsetZRotation /= IMU_CALIBRATION_READINGS;
 
-	this->mpu->setXGyroOffset(-this->offsetXAcceleration);
-	this->mpu->setYGyroOffset(-this->offsetYAcceleration);
-	this->mpu->setZGyroOffset(-this->offsetZAcceleration);
-	this->mpu->setXAccelOffset(-this->offsetXRotation);
-	this->mpu->setYAccelOffset(-this->offsetYRotation);
-	this->mpu->setZAccelOffset(-this->offsetZRotation);
+	// this->mpu->setXAccelOffset(-this->offsetXAcceleration);
+	// this->mpu->setYAccelOffset(-this->offsetYAcceleration);
+	// this->mpu->setZAccelOffset(-this->offsetZAcceleration);
+	this->mpu->setXGyroOffset(-this->offsetXRotation);
+	this->mpu->setYGyroOffset(-this->offsetYRotation);
+	this->mpu->setZGyroOffset(-this->offsetZRotation);
 
 	std::cout << "calibration done, offsets:\n";
-	std::cout << "\tXAcceleration: " << this->offsetXAcceleration << ", ";
-	std::cout << "\tYAcceleration: " << this->offsetYAcceleration << ", ";
-	std::cout << "\tZAcceleration: " << this->offsetZAcceleration << ", ";
-	std::cout << "\tXRotation: " << this->offsetXRotation << ", ";
-	std::cout << "\tYRotation: " << this->offsetYRotation << ", ";
+	std::cout << "\tXAcceleration: " << this->offsetXAcceleration << std::endl;
+	std::cout << "\tYAcceleration: " << this->offsetYAcceleration << std::endl;
+	std::cout << "\tZAcceleration: " << this->offsetZAcceleration << std::endl;
+	std::cout << "\tXRotation: " << this->offsetXRotation << std::endl;
+	std::cout << "\tYRotation: " << this->offsetYRotation << std::endl;
 	std::cout << "\tZRotation: " << this->offsetZRotation << std::endl;
+	std::cout << "press enter to continue:\n";
+	std::cin.get();
 }
