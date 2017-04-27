@@ -189,6 +189,7 @@ int main() {
 						// +- 5 deg should be enough
 
 						if (angle > -verticalBoundary && angle < verticalBoundary) {
+							std::cout << angle << std::endl;
 							break;
 						}
 					}
