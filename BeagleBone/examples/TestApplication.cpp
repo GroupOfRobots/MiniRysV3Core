@@ -190,6 +190,7 @@ int main() {
 
 						// +- 5 deg should be enough
 						if (angle > -5 && angle < 5) {
+							std::cout << "Stood up(?), angle: " << angle << std::endl;
 							break;
 						}
 					}
