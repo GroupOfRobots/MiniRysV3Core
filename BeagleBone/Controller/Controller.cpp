@@ -35,11 +35,11 @@ float Controller::timerValue() {
 
 float Controller::stabilityControl(float value, float setPoint, float dt) {
 	float error = setPoint - value;
-	if (error > ANGLE_MAX_ERROR) {
+	/*if (error > ANGLE_MAX_ERROR) {
 		error = ANGLE_MAX_ERROR;
 	} else if (error < -ANGLE_MAX_ERROR) {
 		error = -ANGLE_MAX_ERROR;
-	}
+	}*/
 
 	this->anglePIDIntegral += error * dt;
 	// Max integral value clipping
@@ -58,11 +58,11 @@ float Controller::stabilityControl(float value, float setPoint, float dt) {
 float Controller::speedControl(float value, float setPoint, float dt) {
 	// Max error value clipping
 	float error = setPoint - value;
-	if (error > SPEED_MAX_ERROR) {
+	/*if (error > SPEED_MAX_ERROR) {
 		error = SPEED_MAX_ERROR;
 	} else if (error < -SPEED_MAX_ERROR) {
 		error = -SPEED_MAX_ERROR;
-	}
+	}*/
 
 	this->speedPIDIntegral += error * dt;
 
