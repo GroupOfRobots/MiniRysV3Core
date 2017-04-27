@@ -20,14 +20,30 @@ Motors motors;
 IMU imu;
 Controller controller;
 volatile Position actual;
+volatile float angle;
 volatile int exitFlag = 0;
 
 void sigintHandler(int) {
 	exitFlag = 1;
 }
 
-// balancing thread function
-void balancing() {
+void inertialUnitThreadFn() {
+	while (!exitFlag) {
+		// Retrieve 2 IMU readings and calculate average (noise reduction)
+		float angle = 0.0;
+		try {
+			angle += imu.getRoll();
+			angle += imu.getRoll();
+		} catch (std::string & error) {
+			std::cout << "Error getting IMU reading: " << error << std::endl;
+			exitFlag = 1;
+			break;
+		}
+		angle = angle/2*180/3.1415;
+	}
+}
+
+void balancingThreadFn() {
 	int steering = 0;
 	int throttle = 0;
 	float finalLeftSpeed = 0;
@@ -50,19 +66,6 @@ void balancing() {
 	while (!exitFlag) {
 		// Update odometry with given loop time (dt)
 		motors.updateOdometry(0.0);
-
-		// Retrieve 4 IMU readings and calculate average (noise reduction)
-		float angle = 0.0;
-		try {
-			angle += imu.getRoll();
-			usleep(50);
-			angle += imu.getRoll();
-		} catch (std::string & error) {
-			std::cout << "Error getting IMU reading: " << error << std::endl;
-			exitFlag = 1;
-			break;
-		}
-		angle = angle/2*180/3.1415;
 
 		// Set current position
 		if (angle > 40.0) {
@@ -148,7 +151,8 @@ int main() {
 		return 2;
 	}
 
-	std::thread balance(balancing);
+	std::thread imuThread(inertialUnitThreadFn);
+	std::thread balanceThread(balancingThreadFn);
 	// 1s
 	usleep(1000 * 1000);
 	while(!exitFlag) {
@@ -177,17 +181,6 @@ int main() {
 					motors.setSpeed(-mult * 600.0, -mult * 600.0, 1);
 					// Wait until we're vertical enough
 					while (true) {
-						usleep(100);
-						float angle = 0.0;
-						try {
-							angle = imu.getRoll();
-						} catch (std::string & error) {
-							std::cout << "Error getting IMU reading: " << error << std::endl;
-							exitFlag = 1;
-							break;
-						}
-						angle = angle * 180/3.1415;
-
 						// +- 5 deg should be enough
 						if (angle > -5 && angle < 5) {
 							std::cout << "Stood up(?), angle: " << angle << std::endl;
@@ -208,7 +201,9 @@ int main() {
 
 	std::cout << "Closing..." << std::endl;
 
-	balance.join();
+	balanceThread.join();
+	imuThread.join();
+
 	try {
 		motors.setSpeed(0.0, 0.0, 1);
 		motors.disable();
