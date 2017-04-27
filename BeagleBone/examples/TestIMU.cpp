@@ -25,7 +25,7 @@ int main() {
 	usleep(100 * 1000);
 
 	try {
-		imu.calibrate();
+		// imu.calibrate();
 		imu.resetFIFO();
 	} catch (std::string & error) {
 		std::cout << "Error starting up: " << error << std::endl;
@@ -34,19 +34,21 @@ int main() {
 
 	usleep(100 * 1000);
 	while(!exitFlag) {
-		float angle = 0.0;
+		float y, p, r;
 		try {
-			angle = imu.getRoll();
+			imu.getYawPitchRoll(&y, &p, &r);
 		} catch (std::string & error) {
 			std::cout << "Error getting IMU reading: " << error << std::endl;
 			exitFlag = 1;
 			break;
 		}
-		angle = angle * 180/3.1415;
+		y = y * 180/3.1415;
+		p = p * 180/3.1415;
+		r = r * 180/3.1415;
 
-		std::cout << "Angle: " << angle << std::endl;
+		std::cout << "YPR: " << y << " " << p << " " << r << std::endl;
 
-		usleep(500 * 1000);
+		usleep(50 * 1000);
 	}
 
 	return 0;
