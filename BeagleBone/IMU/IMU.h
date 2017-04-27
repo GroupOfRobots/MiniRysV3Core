@@ -15,7 +15,7 @@ class IMU {
 		// expected DMP packet size (default is 42 bytes)
 		uint16_t packetSize;
 		// Number of all bytes currently in FIFO
-		uint16_t fifoCount;
+		// uint16_t fifoCount;
 		// FIFO storage buffer
 		uint8_t fifoBuffer[64];
 		// [w, x, y, z] - quaternion container
@@ -39,6 +39,7 @@ class IMU {
 		float getPitch();
 		float getRoll();
 		float getYaw();
+		void getYawPitchRoll(float *, float *, float *);
 		void resetFIFO();
 		// Static calibration - reads the sensor n times, averages it and sets as offset
 		void calibrate();

@@ -7,7 +7,7 @@ IMU::IMU() {
 	this->dmpReady = false;
 	this->devStatus = 0;
 	this->packetSize = 0;
-	this->fifoCount = 0;
+	// this->fifoCount = 0;
 	for (int i = 0; i < 64; ++i) {
 		this->fifoBuffer[i] = 0;
 	}
@@ -61,25 +61,33 @@ void IMU::readData() {
 	}
 
 	// Get current FIFO length
-	fifoCount = this->mpu->getFIFOCount();
+	uint16_t fifoCount = this->mpu->getFIFOCount();
 
 	// Check for FIFO overflow
 	if (fifoCount == 1024) {
 		// reset so we can continue cleanly
 		this->mpu->resetFIFO();
-		// printf("FIFO overflow!\n");
-		return;
 	}
 
 	// Check for DMP data ready interrupt (this should happen frequently)
-	if (fifoCount >= 42) {
-		// Read a packet from FIFO to buffer
-		this->mpu->getFIFOBytes(fifoBuffer, packetSize);
-		// Parse data from FIFO to gravity and pitch/yaw/roll readings
-		this->mpu->dmpGetQuaternion(quaternion, fifoBuffer);
-		this->mpu->dmpGetGravity(gravity, quaternion);
-		this->mpu->dmpGetYawPitchRoll(yawPitchRoll, quaternion, gravity);
+	while (fifoCount < this->packetSize) {
+		fifoCount = this->mpu->getFIFOCount();
+		usleep(100);
 	}
+
+	// Read a packet from FIFO to buffer
+	this->mpu->getFIFOBytes(this->fifoBuffer, this->packetSize);
+	// Parse data from FIFO to gravity and pitch/yaw/roll readings
+	this->mpu->dmpGetQuaternion(this->quaternion, this->fifoBuffer);
+	this->mpu->dmpGetGravity(this->gravity, this->quaternion);
+	this->mpu->dmpGetYawPitchRoll(this->yawPitchRoll, this->quaternion, this->gravity);
+}
+
+void IMU::getYawPitchRoll(float * yaw, float * pitch, float * roll) {
+	readData();
+	*yaw = this->yawPitchRoll[0];
+	*pitch = this->yawPitchRoll[1];
+	*roll = this->yawPitchRoll[2];
 }
 
 float IMU::getPitch() {
