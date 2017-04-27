@@ -12,9 +12,11 @@
 #define MAX_OUTPUT 900
 
 #define ANGLE_MAX_ERROR 25
-#define ANGLE_MAX_INTEGRAL 250
+// #define ANGLE_MAX_INTEGRAL 250
+#define ANGLE_MAX_INTEGRAL 15
 #define SPEED_MAX_ERROR 500
-#define SPEED_MAX_INTEGRAL 5000
+// #define SPEED_MAX_INTEGRAL 5000
+#define SPEED_MAX_INTEGRAL 900
 
 class Controller {
 	private:
