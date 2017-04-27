@@ -1,5 +1,6 @@
 #include "IMU.h"
 #include <string>
+#include <iostream>
 
 IMU::IMU() {
 	this->mpu = new MPU6050();
@@ -98,4 +99,48 @@ float IMU::getYaw() {
 
 void IMU::resetFIFO() {
 	this->mpu->resetFIFO();
+}
+
+void IMU::calibrate() {
+	std::cout << "Fix the position and hit enter\n";
+	std::cin.get();
+	this->offsetXAcceleration = 0;
+	this->offsetYAcceleration = 0;
+	this->offsetZAcceleration = 0;
+	this->offsetXRotation = 0;
+	this->offsetYRotation = 0;
+	this->offsetZRotation = 0;
+	for (int i = 0; i < IMU_CALIBRATION_READINGS; ++i) {
+		int16_t ax, ay, az, gx, gy, gz;
+		this->mpu->getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+		this->offsetXAcceleration += ax;
+		this->offsetYAcceleration += ay;
+		this->offsetZAcceleration += az;
+		this->offsetXRotation += gx;
+		this->offsetYRotation += gy;
+		this->offsetZRotation += gz;
+		usleep(1000);
+	}
+
+	this->offsetXAcceleration /= IMU_CALIBRATION_READINGS;
+	this->offsetYAcceleration /= IMU_CALIBRATION_READINGS;
+	this->offsetZAcceleration /= IMU_CALIBRATION_READINGS;
+	this->offsetXRotation /= IMU_CALIBRATION_READINGS;
+	this->offsetYRotation /= IMU_CALIBRATION_READINGS;
+	this->offsetZRotation /= IMU_CALIBRATION_READINGS;
+
+	this->mpu->setXGyroOffset(-this->offsetXAcceleration);
+	this->mpu->setYGyroOffset(-this->offsetYAcceleration);
+	this->mpu->setZGyroOffset(-this->offsetZAcceleration);
+	this->mpu->setXAccelOffset(-this->offsetXRotation);
+	this->mpu->setYAccelOffset(-this->offsetYRotation);
+	this->mpu->setZAccelOffset(-this->offsetZRotation);
+
+	std::cout << "calibration done, offsets:\n";
+	std::cout << "\tXAcceleration: " << this->offsetXAcceleration << ", ";
+	std::cout << "\tYAcceleration: " << this->offsetYAcceleration << ", ";
+	std::cout << "\tZAcceleration: " << this->offsetZAcceleration << ", ";
+	std::cout << "\tXRotation: " << this->offsetXRotation << ", ";
+	std::cout << "\tYRotation: " << this->offsetYRotation << ", ";
+	std::cout << "\tZRotation: " << this->offsetZRotation << std::endl;
 }

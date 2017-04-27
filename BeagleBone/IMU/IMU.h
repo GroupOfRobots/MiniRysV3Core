@@ -2,6 +2,7 @@
 #define _IMU_H_
 
 #include "MPU6050.h"
+#define IMU_CALIBRATION_READINGS 5
 
 class IMU {
 	private:
@@ -23,6 +24,13 @@ class IMU {
 		VectorFloat *gravity;
 		// [yaw, pitch, roll] - yaw/pitch/roll container
 		float yawPitchRoll[3];
+		// calibration data - X, Y, Z; acceleration and rotation
+		int16_t offsetXAcceleration;
+		int16_t offsetYAcceleration;
+		int16_t offsetZAcceleration;
+		int16_t offsetXRotation;
+		int16_t offsetYRotation;
+		int16_t offsetZRotation;
 	public:
 		IMU();
 		~IMU();
@@ -32,6 +40,8 @@ class IMU {
 		float getRoll();
 		float getYaw();
 		void resetFIFO();
+		// Static calibration - reads the sensor n times, averages it and sets as offset
+		void calibrate();
 };
 
 #endif
