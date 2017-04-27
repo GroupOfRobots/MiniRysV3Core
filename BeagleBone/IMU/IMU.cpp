@@ -104,12 +104,12 @@ void IMU::resetFIFO() {
 void IMU::calibrate() {
 	std::cout << "Fix the position and hit enter\n";
 	std::cin.get();
-	this->offsetXAcceleration = this->mpu->setXAccelOffset();
-	this->offsetYAcceleration = this->mpu->setYAccelOffset();
-	this->offsetZAcceleration = this->mpu->setZAccelOffset();
-	this->offsetXRotation = this->mpu->setXGyroOffset();
-	this->offsetYRotation = this->mpu->setYGyroOffset();
-	this->offsetZRotation = this->mpu->setZGyroOffset();
+	this->offsetXAcceleration = this->mpu->getXAccelOffset();
+	this->offsetYAcceleration = this->mpu->getYAccelOffset();
+	this->offsetZAcceleration = this->mpu->getZAccelOffset();
+	this->offsetXRotation = this->mpu->getXGyroOffset();
+	this->offsetYRotation = this->mpu->getYGyroOffset();
+	this->offsetZRotation = this->mpu->getZGyroOffset();
 
 	std::cout << "calibration initial values:\n";
 	std::cout << "\tXAcceleration: " << this->offsetXAcceleration << std::endl;
