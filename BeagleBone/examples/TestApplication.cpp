@@ -166,12 +166,15 @@ int main() {
 					// 2s
 					usleep(2000 * 1000);
 					motors.enable();
-					motors.setSpeed(mult * 400.0, mult * 400.0, 1);
-					// 0.5s
-					usleep(500 * 1000);
-					motors.setSpeed(-mult * 600.0, -mult * 600.0, 1);
 
-					// Stand up until we're vertical enough
+					// Drive backwards full-speed
+					motors.setSpeed(mult * 400.0, mult * 400.0, 1);
+					// Wait 0.5s
+					usleep(500 * 1000);
+					// Drive forward full-speed
+					motors.setSpeed(-mult * 600.0, -mult * 600.0, 1);
+					// Wait until we're vertical enough
+					float verticalBoundary = 5 * 3.1415 / 180;
 					while (true) {
 						usleep(50);
 						float angle = 0.0;
@@ -184,10 +187,12 @@ int main() {
 						}
 
 						// +- 5 deg should be enough
-						if (angle > -5 && angle < 5) {
+
+						if (angle > -verticalBoundary && angle < verticalBoundary) {
 							break;
 						}
 					}
+
 					controller.zeroPIDs();
 				} catch (std::string & error) {
 					std::cout << "Error standing up from laying: " << error << std::endl;
