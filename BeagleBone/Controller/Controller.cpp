@@ -4,6 +4,7 @@
 Controller::Controller() {
 	timePoint = std::chrono::high_resolution_clock::now();
 	timePointPrevious = std::chrono::high_resolution_clock::now();
+	speedFilterFactor = 0.95;
 	angle = 0;
 	anglePrevious = 0;
 	anglePIDKp = 1;
@@ -87,7 +88,7 @@ void Controller::calculateSpeed(float angle, float speedLeft, float speedRight, 
 	// We use robot_speed(t-1) to compensate the delay
 	float estimatedSpeed = -this->speedPrevious - angularVelocity;
 	// Low pass / integrating filter on estimated speed
-	this->speedFiltered = this->speedFiltered * 0.95 + estimatedSpeed * 0.05;
+	this->speedFiltered = this->speedFiltered * this->speedFilterFactor + estimatedSpeed * (1.0 - this->speedFilterFactor);
 
 	// First control layer: speed control PID
 	// input: user throttle (0)
@@ -131,6 +132,10 @@ void Controller::zeroPIDs() {
 	this->anglePIDError = 0;
 	this->speedPIDIntegral = 0;
 	this->speedPIDError = 0;
+}
+
+void Controller::setSpeedFilterFactor(float factor) {
+	this->speedFilterFactor = factor;
 }
 
 void Controller::setSpeedPID(float kp, float ki, float kd) {

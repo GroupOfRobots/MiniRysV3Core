@@ -139,6 +139,7 @@ int main() {
 	// controller.setStabilityPID(50, 0, 20);
 	controller.setSpeedPID(0.03, 0.0001, 0.008);
 	controller.setStabilityPID(50, 0.05, 20);
+	controller.setSpeedFilterFactor(0.8);
 
 	/*if (!lipol.isGood()) {
 		printf("niski poziom napiecia baterii");

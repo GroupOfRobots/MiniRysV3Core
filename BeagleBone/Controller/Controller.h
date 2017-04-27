@@ -24,6 +24,8 @@ class Controller {
 		std::chrono::high_resolution_clock::time_point timePointPrevious;
 		std::chrono::high_resolution_clock::time_point timePoint;
 
+		float speedFilterFactor;
+
 		float angle;
 		float anglePrevious;
 		float anglePIDKp;
@@ -48,6 +50,7 @@ class Controller {
 	public:
 		Controller();
 		~Controller();
+		void setSpeedFilterFactor(float factor);
 		void setSpeedPID(float kp, float ki, float kd);
 		void setStabilityPID(float kp, float ki, float kd);
 		void calculateSpeed(float angle, float speedLeft, float speedRight, int steering, int throttle, float &speedLeftNew, float &speedRightNew);
