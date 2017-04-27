@@ -9,13 +9,15 @@ OBJS+= build/MPU6050.o
 OBJS+= build/IMU.o
 OBJS+= build/I2Cdev.o
 OBJS+= build/Motors.o
-OBJS+= build/TestApplication.o
 OBJS+= build/sonar.o
 
-all: build/testApp
+all: build/testApp build/testIMU
 
-build/testApp: $(OBJS)
-	$(CXX) $(LFLAGS) $(OBJS) -o build/testApp
+build/testApp: $(OBJS) build/TestApplication.o
+	$(CXX) $(LFLAGS) $(OBJS) build/TestApplication.o -o build/testApp
+
+build/testIMU: $(OBJS) build/TestIMU.o
+	$(CXX) $(LFLAGS) $(OBJS) build/TestIMU.o -o build/testIMU
 
 build/battery.o: Battery/battery.cpp Battery/battery.h
 	$(CXX) $(CXXFLAGS) -c Battery/battery.cpp -o build/battery.o
@@ -40,6 +42,9 @@ build/Motors.o: Motors/Motors.cpp Motors/Motors.h
 
 build/TestApplication.o: examples/TestApplication.cpp
 	$(CXX) $(CXXFLAGS) -c examples/TestApplication.cpp -o build/TestApplication.o
+
+build/TestIMU.o: examples/TestIMU.cpp
+	$(CXX) $(CXXFLAGS) -c examples/TestIMU.cpp -o build/TestIMU.o
 
 build/sonar.o: Sonar/sonar.cpp Sonar/sonar.h
 	$(CXX) $(CXXFLAGS) -c Sonar/sonar.cpp -o build/sonar.o
