@@ -1,6 +1,8 @@
 #include "IMU.h"
-#include <string>
+#include <chrono>
 #include <iostream>
+#include <string>
+#include <thread>
 
 IMU::IMU() {
 	this->mpu = new MPU6050();
@@ -14,6 +16,11 @@ IMU::IMU() {
 	this->quaternion = new Quaternion();
 	this->gravity = new VectorFloat();
 	this->yawPitchRoll[0] = this->yawPitchRoll[1] = this->yawPitchRoll[2] = 0;
+	this->preHeatingExitFlag = true;
+
+	this->yawOffset = 0;
+	this->pitchOffset = 0;
+	this->rollOffset = 0;
 }
 
 IMU::~IMU() {
@@ -33,11 +40,12 @@ void IMU::initialize() {
 
 	// load and configure the DMP
 	devStatus = this->mpu->dmpInitialize();
+	// 1kHz / (1 + 3) = 250Hz
+	// this->mpu->setRate(3);
 
 	// make sure it worked (returns 0 if so)
 	if (devStatus == 0) {
 		// turn on the DMP, now that it's ready
-		//printf("Enabling DMP...\n");
 		this->mpu->setDMPEnabled(true);
 
 		// set our DMP Ready flag so the main loop() function knows it's okay to use it
@@ -67,12 +75,13 @@ void IMU::readData() {
 	if (fifoCount == 1024) {
 		// reset so we can continue cleanly
 		this->mpu->resetFIFO();
+		fifoCount = 0;
 	}
 
 	// Check for DMP data ready interrupt (this should happen frequently)
 	while (fifoCount < this->packetSize) {
 		fifoCount = this->mpu->getFIFOCount();
-		usleep(100);
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 
 	// Read a packet from FIFO to buffer
@@ -84,82 +93,95 @@ void IMU::readData() {
 }
 
 void IMU::getYawPitchRoll(float * yaw, float * pitch, float * roll) {
-	readData();
-	*yaw = this->yawPitchRoll[0];
-	*pitch = this->yawPitchRoll[1];
-	*roll = this->yawPitchRoll[2];
-}
-
-float IMU::getPitch() {
-	readData();
-	return yawPitchRoll[1];
-}
-
-float IMU::getRoll() {
-	readData();
-	return yawPitchRoll[2];
+	this->readData();
+	*yaw = this->yawPitchRoll[0] - this->yawOffset;
+	*pitch = this->yawPitchRoll[1] - this->pitchOffset;
+	*roll = this->yawPitchRoll[2] - this->rollOffset;
 }
 
 float IMU::getYaw() {
-	readData();
-	return yawPitchRoll[0];
+	this->readData();
+	return yawPitchRoll[0] - this->yawOffset;
+}
+
+float IMU::getPitch() {
+	this->readData();
+	return yawPitchRoll[1] - this->pitchOffset;
+}
+
+float IMU::getRoll() {
+	this->readData();
+	return yawPitchRoll[2] - this->rollOffset;
 }
 
 void IMU::resetFIFO() {
 	this->mpu->resetFIFO();
 }
 
+void preHeatingThreadFn(IMU * imu) {
+	while (!imu->getPreHeatingExitFlag()) {
+		imu->readData();
+	}
+}
+
+bool IMU::getPreHeatingExitFlag() {
+	return this->preHeatingExitFlag;
+}
+
 void IMU::calibrate() {
-	std::cout << "Fix the position and hit enter\n";
+	std::cout << "Pre-heating the IMU (30s)...\n";
+
+	// Create the IMU pre-heating thread
+	this->preHeatingExitFlag = false;
+	std::thread preHeatingThread(preHeatingThreadFn, this);
+
+	// Wait 30s
+	auto now = std::chrono::steady_clock::now();
+	std::this_thread::sleep_until(now + std::chrono::seconds(30));
+
+	// Notify user
+	std::cout << "Fix the position and press enter\n";
 	std::cin.get();
-	this->offsetXAcceleration = this->mpu->getXAccelOffset();
-	this->offsetYAcceleration = this->mpu->getYAccelOffset();
-	this->offsetZAcceleration = this->mpu->getZAccelOffset();
-	this->offsetXRotation = this->mpu->getXGyroOffset();
-	this->offsetYRotation = this->mpu->getYGyroOffset();
-	this->offsetZRotation = this->mpu->getZGyroOffset();
 
-	std::cout << "calibration initial values:\n";
-	std::cout << "\tXAcceleration: " << this->offsetXAcceleration << std::endl;
-	std::cout << "\tYAcceleration: " << this->offsetYAcceleration << std::endl;
-	std::cout << "\tZAcceleration: " << this->offsetZAcceleration << std::endl;
-	std::cout << "\tXRotation: " << this->offsetXRotation << std::endl;
-	std::cout << "\tYRotation: " << this->offsetYRotation << std::endl;
-	std::cout << "\tZRotation: " << this->offsetZRotation << std::endl;
+	// Create accumulators for values
+	double yawSum = 0;
+	double pitchSum = 0;
+	double rollSum = 0;
+	// Also read counter
+	unsigned int iterations = 0;
 
-	for (int i = 0; i < IMU_CALIBRATION_READINGS; ++i) {
-		int16_t ax, ay, az, gx, gy, gz;
-		this->mpu->getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-		this->offsetXAcceleration += ax;
-		this->offsetYAcceleration += ay;
-		this->offsetZAcceleration += az;
-		this->offsetXRotation += gx;
-		this->offsetYRotation += gy;
-		this->offsetZRotation += gz;
-		usleep(1000);
+	// Create timer for 5s
+	now = std::chrono::steady_clock::now();
+	auto end = now + std::chrono::milliseconds(5000);
+
+	this->preHeatingExitFlag = true;
+
+	// Until that timer...
+	while (end > std::chrono::steady_clock::now()) {
+		// Get a reading
+		this->readData();
+		yawSum += this->yawPitchRoll[0];
+		pitchSum += this->yawPitchRoll[1];
+		rollSum += this->yawPitchRoll[2];
+
+		// Increase iteration counter
+		++iterations;
 	}
 
-	this->offsetXAcceleration /= IMU_CALIBRATION_READINGS;
-	this->offsetYAcceleration /= IMU_CALIBRATION_READINGS;
-	this->offsetZAcceleration /= IMU_CALIBRATION_READINGS;
-	this->offsetXRotation /= IMU_CALIBRATION_READINGS;
-	this->offsetYRotation /= IMU_CALIBRATION_READINGS;
-	this->offsetZRotation /= IMU_CALIBRATION_READINGS;
+	// Calculate average reading and save it
+	this->yawOffset = yawSum / iterations;
+	this->pitchOffset = pitchSum / iterations;
+	this->rollOffset = rollSum / iterations;
 
-	// this->mpu->setXAccelOffset(-this->offsetXAcceleration);
-	// this->mpu->setYAccelOffset(-this->offsetYAcceleration);
-	// this->mpu->setZAccelOffset(-this->offsetZAcceleration);
-	this->mpu->setXGyroOffset(-this->offsetXRotation);
-	this->mpu->setYGyroOffset(-this->offsetYRotation);
-	this->mpu->setZGyroOffset(-this->offsetZRotation);
-
+	// Notify user
 	std::cout << "calibration done, offsets:\n";
-	std::cout << "\tXAcceleration: " << this->offsetXAcceleration << std::endl;
-	std::cout << "\tYAcceleration: " << this->offsetYAcceleration << std::endl;
-	std::cout << "\tZAcceleration: " << this->offsetZAcceleration << std::endl;
-	std::cout << "\tXRotation: " << this->offsetXRotation << std::endl;
-	std::cout << "\tYRotation: " << this->offsetYRotation << std::endl;
-	std::cout << "\tZRotation: " << this->offsetZRotation << std::endl;
+	std::cout << "\tYaw: " << this->yawOffset << std::endl;
+	std::cout << "\tPitch: " << this->pitchOffset << std::endl;
+	std::cout << "\tRoll: " << this->rollOffset << std::endl;
 	std::cout << "press enter to continue:\n";
 	std::cin.get();
+
+	// End pre-heating thread
+	this->preHeatingExitFlag = true;
+	preHeatingThread.join();
 }

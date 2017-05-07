@@ -25,24 +25,23 @@ class IMU {
 		// [yaw, pitch, roll] - yaw/pitch/roll container
 		float yawPitchRoll[3];
 		// calibration data - X, Y, Z; acceleration and rotation
-		int16_t offsetXAcceleration;
-		int16_t offsetYAcceleration;
-		int16_t offsetZAcceleration;
-		int16_t offsetXRotation;
-		int16_t offsetYRotation;
-		int16_t offsetZRotation;
+		float yawOffset;
+		float pitchOffset;
+		float rollOffset;
+		bool preHeatingExitFlag;
 	public:
 		IMU();
 		~IMU();
 		void initialize();
 		void readData();
+		float getYaw();
 		float getPitch();
 		float getRoll();
-		float getYaw();
 		void getYawPitchRoll(float *, float *, float *);
 		void resetFIFO();
 		// Static calibration - reads the sensor n times, averages it and sets as offset
 		void calibrate();
+		bool getPreHeatingExitFlag();
 };
 
 #endif
