@@ -1,5 +1,5 @@
-/*
-Keypad controll example
+
+/*Keypad controll example
 
 
 #include <stdlib.h>
@@ -9,7 +9,7 @@ Keypad controll example
 #include <chrono>
 #include <thread>
 #include <unistd.h>
-#include <termios.h>
+
 #include <assert.h>
 #include <stdio.h>
 #include <string>
